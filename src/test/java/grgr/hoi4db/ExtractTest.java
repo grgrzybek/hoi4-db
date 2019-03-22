@@ -29,48 +29,6 @@ import org.junit.jupiter.api.Test;
 
 public class ExtractTest {
 
-    /*
-     * I want to be able to extract all ship designs available to all countries.
-     * For example, Japan in 1936 (MtG) has 2 ships (not designs) of "Chikuma" class.
-     *
-     * "history/countries/JAP - Japan.txt" has:
-     *  create_equipment_variant = {
-     *      name = "Chikuma Class"
-     *      type = ship_hull_cruiser_1
-     *      name_group = JAP_CA_HISTORICAL
-     *      parent_version = 0
-     *      modules = {
-     *          fixed_ship_battery_slot = ship_light_medium_battery_1
-     *          fixed_ship_anti_air_slot = empty
-     *          fixed_ship_fire_control_system_slot = ship_fire_control_system_0
-     *          fixed_ship_radar_slot = empty
-     *          fixed_ship_engine_slot = cruiser_ship_engine_1
-     *          fixed_ship_armor_slot = ship_armor_cruiser_1
-     *          fixed_ship_secondaries_slot = empty
-     *          mid_1_custom_slot = empty
-     *          mid_2_custom_slot = empty
-     *          rear_1_custom_slot = empty
-     *      }
-     *      obsolete = yes
-     *  }
-     *
-     * "history/units/JAP_1936_naval.txt" has:
-     *  fleet = {
-     *      name = "Kaigun Yobikantai"
-     *      naval_base = 9859  #Ominato
-     *  ...
-     *      #Pusan
-     *      task_force = {
-     *          name = "Bogojunyokan Kantai"
-     *          location = 4056  # Pusan
-     *          #Mutsuki-class destroyers
-     *          ...
-     *          ship = { name = "Hirado" definition = light_cruiser equipment = { ship_hull_cruiser_1 = {amount = 1 owner = JAP version_name = "Chikuma Class"} } }
-     *          ship = { name = "Yahagi" definition = light_cruiser equipment = { ship_hull_cruiser_1 = {amount = 1 owner = JAP version_name = "Chikuma Class"} } }
-     *      }
-     *  }
-     */
-
     @Test
     public void readHoiData() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
@@ -82,7 +40,6 @@ public class ExtractTest {
     @Test
     public void readAnonymousRootScope() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
-
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/values.txt"));
         prettyPrint(parser);
         parser.close();
@@ -91,7 +48,6 @@ public class ExtractTest {
     @Test
     public void readAcrossBuffers() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
-
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/whitespace.txt"));
         prettyPrint(parser);
         parser.close();
@@ -100,7 +56,6 @@ public class ExtractTest {
     @Test
     public void readNestedScopes() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
-
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/scopes.txt"));
         prettyPrint(parser);
         parser.close();

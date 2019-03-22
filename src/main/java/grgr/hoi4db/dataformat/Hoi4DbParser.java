@@ -341,6 +341,7 @@ public class Hoi4DbParser extends ParserBase {
      * @throws IOException
      */
     private int skipWsAndComments() throws IOException {
+        updateLocation();
         boolean inComment = false;
         boolean hadCr = false;
         while (thereIsMore()) {
@@ -349,7 +350,9 @@ public class Hoi4DbParser extends ParserBase {
                 if (hadCr && c != '\n') {
                     // Mac
                     ++_tokenInputRow;
+                    ++_currInputRow;
                     _tokenInputCol = 0;
+                    _currInputRowStart = _inputPtr;
                 }
                 if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
                     if (c == '\r' || c == '\n') {
@@ -357,7 +360,9 @@ public class Hoi4DbParser extends ParserBase {
                     }
                     if (c == '\n') {
                         ++_tokenInputRow;
+                        ++_currInputRow;
                         _tokenInputCol = 0;
+                        _currInputRowStart = _inputPtr;
                     }
                     hadCr = c == '\r';
                 } else if (c == '#' && !inComment) {
@@ -379,6 +384,7 @@ public class Hoi4DbParser extends ParserBase {
      * @return if name is followed by {@code =}, it's a field name (or root scope name), otherwise it's array item
      */
     private Hoi4Token findToken() throws IOException {
+        updateLocation();
         boolean crossBufferNeeded = false;
         boolean gotName = false;
 
@@ -455,6 +461,7 @@ public class Hoi4DbParser extends ParserBase {
      * This method progresses through buffer and tries to find a value. It updates the pointers.
      */
     private JsonToken parseValue() throws JsonParseException {
+        updateLocation();
         boolean crossBufferNeeded = false;
 
         char[] outBuf = null;
@@ -573,6 +580,7 @@ public class Hoi4DbParser extends ParserBase {
      * @return
      */
     private JsonToken progressToNextToken() throws IOException {
+        updateLocation();
         int c = skipWsAndComments();
         if (c == -1) {
             return null;
@@ -631,6 +639,14 @@ public class Hoi4DbParser extends ParserBase {
     @Override
     public int getTextOffset() throws IOException {
         return 0;
+    }
+
+    private void updateLocation()
+    {
+        int ptr = _inputPtr;
+        _tokenInputTotal = _currInputProcessed + ptr;
+        _tokenInputRow = _currInputRow;
+        _tokenInputCol = ptr - _currInputRowStart;
     }
 
     private enum Hoi4Token {
