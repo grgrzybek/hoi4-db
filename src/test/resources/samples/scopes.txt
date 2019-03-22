@@ -1,0 +1,26 @@
+
+equipments = {
+	ship_hull_submarine = {
+		year = 1922
+		is_archetype = yes # inline comment
+		upgrades = {
+			ship_reliability_upgrade
+			sub_engine_upgrade
+			sub_stealth_upgrade
+			sub_torpedo_upgrade
+		}
+		interface_category = interface_category_other_ships
+		module_slots = {
+			fixed_ship_torpedo_slot = {
+				required = yes
+				allowed_module_categories = { ship_torpedo_sub }
+			}
+		}
+		module_count_limit = {
+			category = ship_radar
+			count < 2
+		}
+	}
+}
+
+# end comment

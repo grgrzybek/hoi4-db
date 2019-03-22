@@ -1,0 +1,10 @@
+# comment should be ignored
+name1 = value # string
+name2 = { item1
+          1.0 } # an array
+name2a = { } # an empty array
+name3 = { item1 = 1.0 } # an object
+name4 = false # boolean
+name5 = 1 # biginteger
+name6 = 1.0 # bigdecimal comments may occur at the end of line, next line doesn't end with EOL
+name7 = "name with spaces" # string
