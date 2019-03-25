@@ -117,9 +117,6 @@ public class Hoi4DbParser extends ParserBase {
 
             switch (_currToken) {
                 case START_OBJECT:
-                    if (!thereIsMore()) {
-                        _reportInvalidEOF("Reached end of file, expected a field", _currToken);
-                    }
                     c = skipWsAndComments();
                     if (c == -1) {
                         // could be empty file (or comments only)

@@ -61,7 +61,6 @@ public class SteamTest {
                 .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
                 .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
                 .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getName().equals("countries"))
-                .filter(p -> p.toFile().length() > 0)
                 .forEach(p -> {
                     try {
                         LOG.info("Parsing {}", p);
