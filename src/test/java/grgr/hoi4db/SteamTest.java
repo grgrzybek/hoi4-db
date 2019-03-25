@@ -19,12 +19,10 @@
 package grgr.hoi4db;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SteamTest {
 
@@ -55,23 +53,29 @@ public class SteamTest {
     @Test
     public void readHoiData() throws Exception {
         File common = new File(HOI4_DIR, "common");
+        final List<String> problems = new LinkedList<>();
         Files.walk(common.toPath())
                 .filter(p -> p.toFile().isFile() && p.toFile().getName().endsWith(".txt"))
-                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("graphicalculturetype.txt"))
-                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
-                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
-                .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getName().equals("countries"))
+//                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("graphicalculturetype.txt"))
+//                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
+//                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
+//                .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getName().equals("countries"))
                 .forEach(p -> {
                     try {
-                        LOG.info("Parsing {}", p);
+//                        LOG.info("Parsing {}", p);
                         JsonFactory factory = new Hoi4DbFactory();
                         JsonParser parser = factory.createParser(p.toFile());
                         prettyPrint(parser, false);
                         parser.close();
                     } catch (Exception e) {
-                        fail("Problem processing " + p + ": " + e.getMessage(), e);
+                        problems.add("Problem processing " + p + ": " + e.getMessage());
                     }
                 });
+
+        for (String ex : problems) {
+            LOG.info(ex);
+        }
+        assertEquals(0, problems.size());
     }
 
     private void prettyPrint(JsonParser parser, boolean print) throws IOException {
