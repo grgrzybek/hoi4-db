@@ -1,0 +1,3 @@
+#names = { Achille Amédée Édouard }
+#callsigns = { Bear "White Lily" }
+weather_extreme_cold = { -100.0 -25.0 }

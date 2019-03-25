@@ -30,14 +30,6 @@ import org.junit.jupiter.api.Test;
 public class ExtractTest {
 
     @Test
-    public void readHoiData() throws Exception {
-        JsonFactory factory = new Hoi4DbFactory();
-        JsonParser parser = factory.createParser(new File("/data/steam/steamapps/common/Hearts of Iron IV/history/countries/JAP - Japan.txt"));
-        prettyPrint(parser);
-        parser.close();
-    }
-
-    @Test
     public void readAnonymousRootScope() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/values.txt"));
@@ -57,6 +49,30 @@ public class ExtractTest {
     public void readNestedScopes() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/scopes.txt"));
+        prettyPrint(parser);
+        parser.close();
+    }
+
+    @Test
+    public void readOperators() throws Exception {
+        JsonFactory factory = new Hoi4DbFactory();
+        JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/operators.txt"));
+        prettyPrint(parser);
+        parser.close();
+    }
+
+    @Test
+    public void readNoRootAndFirstFieldIsScope() throws Exception {
+        JsonFactory factory = new Hoi4DbFactory();
+        JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/noroot.txt"));
+        prettyPrint(parser);
+        parser.close();
+    }
+
+    @Test
+    public void readNonStandardArrayItems() throws Exception {
+        JsonFactory factory = new Hoi4DbFactory();
+        JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/arrays.txt"));
         prettyPrint(parser);
         parser.close();
     }
@@ -84,7 +100,7 @@ public class ExtractTest {
                 }
             } else if (t.toString().startsWith("VALUE_")) {
                 indent(ind);
-                System.out.printf("%s\n", parser.getCurrentValue());
+                System.out.printf("\"%s\"\n", parser.getCurrentValue());
             } else if (t == JsonToken.END_OBJECT) {
                 ind -= 3;
                 indent(ind);

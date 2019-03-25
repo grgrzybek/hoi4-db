@@ -128,6 +128,15 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <excludes>
+                        <exclude>**/SteamTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <!-- Tools -->
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -252,5 +261,33 @@
         </dependency>
 
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>steam</id>
+            <activation>
+                <property>
+                    <name>steam.dir</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                            <excludes combine.self="override" />
+                            <includes>
+                                <include>**/SteamTest.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <steam.dir>${steam.dir}</steam.dir>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

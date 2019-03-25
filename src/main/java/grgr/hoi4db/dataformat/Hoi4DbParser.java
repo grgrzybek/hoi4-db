@@ -85,42 +85,11 @@ public class Hoi4DbParser extends ParserBase {
         int c;
         Hoi4Token ht;
         if (docStart) {
-            // we're just starting. there may be:
-            // - comment or whitespace
-            // - name = value
-            // - name = { ...
-            // in case of "name = value" at the begining I'm going to wrap this value (and all following) inside anonymous root object
-            // in case of "name = { ..." at the beginning, there'll be named root object
-            c = skipWsAndComments();
-            if (c == -1) {
-                _reportInvalidEOF("Expected anonymous or named scope", null);
-            }
-            if (!(nameChar(c) || c == '"' || c == '-' || c == '+')) {
-                _reportUnexpectedChar(c, "Expected start of literal/quoted value or number");
-            }
-            ht = findToken();
-            if (ht == Hoi4Token.FIELD) {
-                // it still may be a first field inside anonymous, implicit root scope
-                c = skipWsAndComments();
-
-                // at doc start, we always have start of object
-                _currToken = JsonToken.START_OBJECT;
-                if (c != '{') {
-                    // we have anonymous scope and what we've found is actually first field in this scope
-                    _nextToken = JsonToken.FIELD_NAME;
-                    // but we have to preserver previous name which turned out to be field name inside anonymous scope
-                    _nextName = _parsingContext.getCurrentName();
-                    _parsingContext.setCurrentName("<anonymous>");
-                } else {
-                    ++_inputPtr; // to skip '{'
-                }
-                _parsingContext = _parsingContext.createChildObjectContext(_tokenInputRow, _tokenInputCol);
-                docStart = false;
-
-                return _currToken;
-            }
-            _reportError("Expected start of scope or first field of anonymous scope");
-            return null;
+            docStart = false;
+            _parsingContext.setCurrentName("ROOT");
+            _parsingContext = _parsingContext.createChildObjectContext(_tokenInputRow, _tokenInputCol);
+            _currToken = JsonToken.START_OBJECT;
+            return _currToken;
         } else {
             // we're in some scope and we won't leave it till EOF
             // we expect fields and values (which may be scopes or arrays)
@@ -152,6 +121,12 @@ public class Hoi4DbParser extends ParserBase {
                         _reportInvalidEOF("Reached end of file, expected a field", _currToken);
                     }
                     c = skipWsAndComments();
+                    if (c == -1) {
+                        // could be empty file (or comments only)
+                        _currToken = JsonToken.END_OBJECT;
+                        _parsingContext = _parsingContext.clearAndGetParent();
+                        return _currToken;
+                    }
                     if (c == '}') {
                         // end of object - possibly empty, but let's allow this
                         _currToken = JsonToken.END_OBJECT;
@@ -200,12 +175,12 @@ public class Hoi4DbParser extends ParserBase {
                             return _currToken;
                         }
                         String currentName = _parsingContext.getCurrentName();
-                        if (c == '"' || c == '-' || c == '+') {
-                            // we already know it's an array item
-                            ht = Hoi4Token.ITEM;
-                        } else {
-                            ht = findToken();
-                        }
+//                        if (c == '-' || c == '+') {
+//                            // we already know it's an array item
+//                            ht = Hoi4Token.ITEM;
+//                        } else {
+//                        }
+                        ht = findToken();
                         if (ht == Hoi4Token.FIELD) {
                             _currToken = JsonToken.START_OBJECT;
                             _nextToken = JsonToken.FIELD_NAME;
@@ -214,7 +189,7 @@ public class Hoi4DbParser extends ParserBase {
                             _parsingContext.setCurrentName(currentName);
                             _parsingContext = _parsingContext.createChildObjectContext(_tokenInputRow, _tokenInputCol);
                         } else if (ht == Hoi4Token.ITEM) {
-                            // token turned out to be an array item, so it's a value to parse
+                            // token turned out to be an array item, so there's a value to parse
                             _currToken = JsonToken.START_ARRAY;
                             _parsingContext = _parsingContext.createChildArrayContext(_tokenInputRow, _tokenInputCol);
                             _nextToken = parseValue(_nextName);
@@ -252,7 +227,7 @@ public class Hoi4DbParser extends ParserBase {
                         return _currToken;
                     }
 
-                    // after end of scope/array, and after a value we expect end of parent scope or next field (not item)
+                    // after end of scope/array, and after a value we expect end of parent scope or next field
                     c = skipWsAndComments();
                     _parsingContext.setCurrentValue(null);
                     if (c == '}') {
@@ -264,13 +239,11 @@ public class Hoi4DbParser extends ParserBase {
                         _parsingContext = _parsingContext.clearAndGetParent();
                         ++_inputPtr;
                     } else {
-                        if (_parsingContext.inArray()) {
-                            ht = Hoi4Token.ITEM;
-                        } else {
-                            ht = findToken();
-                        }
+                        // even in array, we may encounter another scope (e.g., condition)
+                        ht = findToken();
                         if (ht == Hoi4Token.ITEM) {
-                            _currToken = parseValue();
+                            // after finding an item, we already have it parsed
+                            _currToken = parseValue(_nextName);
                         } else if (ht == Hoi4Token.FIELD) {
                             _currToken = JsonToken.FIELD_NAME;
                         } else {
@@ -387,6 +360,7 @@ public class Hoi4DbParser extends ParserBase {
         updateLocation();
         boolean crossBufferNeeded = false;
         boolean gotName = false;
+        boolean quoted = false;
 
         char[] outBuf = null;
         int outPtr = -1;
@@ -398,7 +372,13 @@ public class Hoi4DbParser extends ParserBase {
             // iterate within single buffer
             while (_inputPtr < _inputEnd) {
                 char c = _inputBuffer[_inputPtr];
-                if (!nameChar(c)) {
+                if (c == '"') {
+                    quoted = !quoted;
+                    _inputPtr++;
+                    continue;
+                }
+                if (!quoted && !nameChar(c) && !Character.isLetter(c)) {
+                    // token may use '"' (common/decisions/MEX.txt: "PAN" = {...)
                     gotName = true;
                     break;
                 }
@@ -448,19 +428,31 @@ public class Hoi4DbParser extends ParserBase {
             skipWsAndComments();
             return Hoi4Token.FIELD;
         }
-        if (c == '}' || nameChar(c)) {
+        if (c == '>' || c == '<') {
+            // special case - it's an expression that we'll treat as part of the value. We have a field, but will
+            // include the operator in the value
+            _parsingContext.setCurrentName(_nextName);
+            _nextName = null;
+            return Hoi4Token.FIELD;
+        }
+        if (c == '}' || nameChar(c) || c == '"' || Character.isLetter(c)) {
             // _nextName turns out to be a value - to be parsed later
             return Hoi4Token.ITEM;
         }
 
+        if (c == -1 && _parsingContext.getParent() == null) {
+            return null;
+        }
+
         _reportUnexpectedChar(c, "Invalid character after field name");
+
         return Hoi4Token.UNKNOWN;
     }
 
     /**
      * This method progresses through buffer and tries to find a value. It updates the pointers.
      */
-    private JsonToken parseValue() throws JsonParseException {
+    private JsonToken parseValue() throws IOException {
         updateLocation();
         boolean crossBufferNeeded = false;
 
@@ -469,8 +461,14 @@ public class Hoi4DbParser extends ParserBase {
         boolean escape = false;
         boolean inString = false;
         boolean gotValue = false;
+        int operator = -1;
 
         String raw = null;
+        if (thereIsMore() && (_inputBuffer[_inputPtr] == '>' || _inputBuffer[_inputPtr] == '<')) {
+            operator = _inputBuffer[_inputPtr];
+            ++_inputPtr;
+            skipWsAndComments();
+        }
 
         // iterate for value - even across buffers
         while (thereIsMore()) {
@@ -525,16 +523,21 @@ public class Hoi4DbParser extends ParserBase {
             raw = new String(_textBuffer.getTextBuffer(), _textBuffer.getTextOffset(), _textBuffer.size());
         }
 
-        return parseValue(raw);
+        return parseValue(raw, operator);
+    }
+
+    private JsonToken parseValue(String raw) throws JsonParseException {
+        return parseValue(raw, -1);
     }
 
     /**
      * This method doesn't progress through buffer and works only on passed raw (string) value. It sets
      * value in current parsing context;
      * @param raw
+     * @param operator if different than {@code -1}, it's an operator for a value
      * @return
      */
-    private JsonToken parseValue(String raw) throws JsonParseException {
+    private JsonToken parseValue(String raw, int operator) throws JsonParseException {
         // check type of value: string, boolean, bigdecimal, biginteger
         if (raw == null) {
             _reportError("Can't parse value");
@@ -550,12 +553,16 @@ public class Hoi4DbParser extends ParserBase {
         char c = raw.charAt(0);
         if ((c >= '0' && c <= '9') || c == '-' || c == '+') {
             // a number
-            if (raw.contains(".")) {
-                _parsingContext.setCurrentValue(new BigDecimal(raw));
-                return JsonToken.VALUE_NUMBER_FLOAT;
-            } else {
-                _parsingContext.setCurrentValue(new BigInteger(raw));
-                return JsonToken.VALUE_NUMBER_INT;
+            try {
+                if (raw.contains(".")) {
+                    _parsingContext.setCurrentValue(operator > -1 ? new ConstrainedValue((char) operator, new BigDecimal(raw)) : new BigDecimal(raw));
+                    return JsonToken.VALUE_NUMBER_FLOAT;
+                } else {
+                    _parsingContext.setCurrentValue(operator > -1 ? new ConstrainedValue((char) operator, new BigInteger(raw)) : new BigInteger(raw));
+                    return JsonToken.VALUE_NUMBER_INT;
+                }
+            } catch (NumberFormatException ignore) {
+                // treat as String
             }
         }
 
@@ -599,7 +606,9 @@ public class Hoi4DbParser extends ParserBase {
     }
 
     private boolean nameChar(int c) {
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '.') {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+                || (c >= '0' && c <= '9')
+                || c == '_' || c == '.' || c == '@' || c == '?' || c == ':' || c == '-' || c == '\'' || c == '’') {
             return true;
         }
         return false;
