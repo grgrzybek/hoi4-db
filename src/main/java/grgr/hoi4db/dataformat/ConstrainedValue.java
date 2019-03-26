@@ -40,4 +40,5 @@ public class ConstrainedValue {
     public String toString() {
         return "((" + operator + " " + value + "))";
     }
+
 }

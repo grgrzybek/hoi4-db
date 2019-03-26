@@ -483,7 +483,7 @@ public class Hoi4DbParser extends ParserBase {
                     }
                     escape = false;
                 }
-                if (!inString && !nameChar(c) && !numberChar(c)) {
+                if (!inString && !nameChar(c) && !numberChar(c) && c != '/') {
                     // end of value. let's allow newlines inside string
                     gotValue = true;
                     --_inputPtr;

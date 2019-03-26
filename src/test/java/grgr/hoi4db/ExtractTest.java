@@ -18,7 +18,6 @@
  */
 package grgr.hoi4db;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonFactory;

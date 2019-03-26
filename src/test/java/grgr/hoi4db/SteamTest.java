@@ -52,25 +52,31 @@ public class SteamTest {
 
     @Test
     public void readHoiData() throws Exception {
-        File common = new File(HOI4_DIR, "common");
+        File[] dirs = new File[] {
+                new File(HOI4_DIR, "common"),
+                new File(HOI4_DIR, "history")
+        };
         final List<String> problems = new LinkedList<>();
-        Files.walk(common.toPath())
-                .filter(p -> p.toFile().isFile() && p.toFile().getName().endsWith(".txt"))
-//                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("graphicalculturetype.txt"))
-//                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
-//                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
-//                .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getName().equals("countries"))
-                .forEach(p -> {
-                    try {
-//                        LOG.info("Parsing {}", p);
-                        JsonFactory factory = new Hoi4DbFactory();
-                        JsonParser parser = factory.createParser(p.toFile());
-                        prettyPrint(parser, false);
-                        parser.close();
-                    } catch (Exception e) {
-                        problems.add("Problem processing " + p + ": " + e.getMessage());
-                    }
-                });
+        for (File dir : dirs) {
+            Files.walk(dir.toPath())
+                    .filter(p -> p.toFile().isFile() && p.toFile().getName().endsWith(".txt"))
+    //                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("graphicalculturetype.txt"))
+    //                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
+    //                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
+    //                .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getName().equals("countries"))
+    //                .filter(p -> p.toFile().isFile() && p.toFile().getName().equals("FRA_1939_naval_legacy.txt"))
+                    .forEach(p -> {
+                        try {
+    //                        LOG.info("Parsing {}", p);
+                            JsonFactory factory = new Hoi4DbFactory();
+                            JsonParser parser = factory.createParser(p.toFile());
+                            prettyPrint(parser, true);
+                            parser.close();
+                        } catch (Exception e) {
+                            problems.add("Problem processing " + p + ": " + e.getMessage());
+                        }
+                    });
+        }
 
         for (String ex : problems) {
             LOG.info(ex);
