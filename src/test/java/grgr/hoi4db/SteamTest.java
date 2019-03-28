@@ -27,6 +27,9 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import grgr.hoi4db.dataformat.Hoi4DbFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -82,6 +85,13 @@ public class SteamTest {
             LOG.info(ex);
         }
         assertEquals(0, problems.size());
+    }
+
+    @Test
+    public void bindToMap() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
+        JsonNode tree = mapper.readTree(new File(HOI4_DIR, "history/countries/JAP - Japan.txt"));
+        mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
     }
 
     private void prettyPrint(JsonParser parser, boolean print) throws IOException {

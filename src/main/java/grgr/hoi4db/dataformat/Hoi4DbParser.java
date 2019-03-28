@@ -552,11 +552,25 @@ public class Hoi4DbParser extends ParserBase {
             // a number
             try {
                 if (raw.contains(".")) {
-                    _parsingContext.setCurrentValue(operator > -1 ? new ConstrainedValue((char) operator, new BigDecimal(raw)) : new BigDecimal(raw));
-                    return JsonToken.VALUE_NUMBER_FLOAT;
+                    BigDecimal value = new BigDecimal(raw);
+                    _parsingContext.setCurrentValue(operator > -1 ? new ConstrainedValue((char) operator, value) : value);
+                    if (operator > -1) {
+                        return JsonToken.VALUE_STRING;
+                    } else {
+                        _numTypesValid = NR_BIGDECIMAL;
+                        _numberBigDecimal = value;
+                        return JsonToken.VALUE_NUMBER_FLOAT;
+                    }
                 } else {
-                    _parsingContext.setCurrentValue(operator > -1 ? new ConstrainedValue((char) operator, new BigInteger(raw)) : new BigInteger(raw));
-                    return JsonToken.VALUE_NUMBER_INT;
+                    BigInteger value = new BigInteger(raw);
+                    _parsingContext.setCurrentValue(operator > -1 ? new ConstrainedValue((char) operator, value) : value);
+                    if (operator > -1) {
+                        return JsonToken.VALUE_STRING;
+                    } else {
+                        _numTypesValid = NR_BIGINT;
+                        _numberBigInt = value;
+                        return JsonToken.VALUE_NUMBER_INT;
+                    }
                 }
             } catch (NumberFormatException ignore) {
                 // treat as String
@@ -629,7 +643,10 @@ public class Hoi4DbParser extends ParserBase {
 
     @Override
     public String getText() throws IOException {
-        return null;
+        if (_parsingContext.getCurrentValue() == null) {
+            return null;
+        }
+        return _parsingContext.getCurrentValue().toString();
     }
 
     @Override

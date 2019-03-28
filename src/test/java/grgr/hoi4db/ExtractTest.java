@@ -89,7 +89,7 @@ public class ExtractTest {
                 t = parser.nextToken();
                 indent(ind);
                 if (t != JsonToken.START_OBJECT && t != JsonToken.START_ARRAY) {
-                    System.out.printf("%s = %s\n", n, parser.getCurrentValue());
+                    System.out.printf("\"%s\" = \"%s\"\n", n, parser.getCurrentValue());
                 } else if (t == JsonToken.START_OBJECT) {
                     System.out.printf("%s = {\n", n);
                     ind += 3;
