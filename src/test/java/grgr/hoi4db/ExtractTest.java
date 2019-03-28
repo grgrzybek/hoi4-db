@@ -69,6 +69,14 @@ public class ExtractTest {
     }
 
     @Test
+    public void objectsInArray() throws Exception {
+        JsonFactory factory = new Hoi4DbFactory();
+        JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/objectinarray.txt"));
+        prettyPrint(parser);
+        parser.close();
+    }
+
+    @Test
     public void readNonStandardArrayItems() throws Exception {
         JsonFactory factory = new Hoi4DbFactory();
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/arrays.txt"));
@@ -76,30 +84,40 @@ public class ExtractTest {
         parser.close();
     }
 
+    /**
+     * Prints the tree structure of events and associated names.
+     * <em>current name</em> is the name associated with the current token.
+     * For {@link JsonToken#FIELD_NAME}s it will be the same as what {@code #getText} returns.
+     * For field values it will be preceding field name.
+     * For others (array values, root-level values) it will be null.
+     *
+     * @param parser
+     * @throws IOException
+     */
     private void prettyPrint(JsonParser parser) throws IOException {
         int ind = 0;
         while (parser.nextToken() != null) {
             JsonToken t = parser.currentToken();
             if (t == JsonToken.START_OBJECT) {
                 indent(ind);
-                System.out.println("{");
+                System.out.println("{ " + "<" + parser.currentName() + ">");
                 ind += 3;
             } else if (t == JsonToken.FIELD_NAME) {
                 String n = parser.getCurrentName();
                 t = parser.nextToken();
                 indent(ind);
                 if (t != JsonToken.START_OBJECT && t != JsonToken.START_ARRAY) {
-                    System.out.printf("\"%s\" = \"%s\"\n", n, parser.getCurrentValue());
+                    System.out.printf("\"%s\" = \"%s\" " + "<" + parser.currentName() + ">" + "\n", n, parser.getCurrentValue());
                 } else if (t == JsonToken.START_OBJECT) {
-                    System.out.printf("%s = {\n", n);
+                    System.out.printf("\"%s\" = { "  + "<" + parser.currentName() + ">" + "\n", n);
                     ind += 3;
                 } else {
-                    System.out.printf("%s = [\n", n);
+                    System.out.printf("\"%s\" = [ " + "<" + parser.currentName() + ">" + "\n", n);
                     ind += 3;
                 }
             } else if (t.toString().startsWith("VALUE_")) {
                 indent(ind);
-                System.out.printf("\"%s\"\n", parser.getCurrentValue());
+                System.out.printf("\"%s\" " + "<" + parser.currentName() + ">" + "\n", parser.getCurrentValue());
             } else if (t == JsonToken.END_OBJECT) {
                 ind -= 3;
                 indent(ind);

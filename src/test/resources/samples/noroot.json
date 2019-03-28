@@ -1,0 +1,23 @@
+{
+  "technology_categories": [
+    "light_air",
+    "medium_air",
+    "heavy_air",
+    "armor",
+    "naval_minelaying"
+  ],
+  "technology_folders": [
+    "air_techs_folder",
+    {
+      "naval_folder": {
+        "available": {
+          "not": {
+            "has_dlc": "Man the Guns"
+          }
+        }
+      }
+    },
+    "industry_folder",
+    "land_doctrine_folder"
+  ]
+}

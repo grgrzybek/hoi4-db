@@ -230,6 +230,11 @@ public class Hoi4DbParser extends ParserBase {
                     if (c == '}') {
                         if (_parsingContext.inObject()) {
                             _currToken = JsonToken.END_OBJECT;
+                            if (_parsingContext.getParent().inArray()) {
+                                // pop extra object created for non-anonymous object being an array item
+                                _nextToken = JsonToken.END_OBJECT;
+                                _parsingContext.getParent().setCurrentName(null);
+                            }
                         } else {
                             _currToken = JsonToken.END_ARRAY;
                         }
@@ -243,6 +248,13 @@ public class Hoi4DbParser extends ParserBase {
                             _currToken = parseValue(_nextName);
                         } else if (ht == Hoi4Token.FIELD) {
                             _currToken = JsonToken.FIELD_NAME;
+                            if (_parsingContext.inArray()) {
+                                // #2: we have to convert named object to anonymous object with one field
+                                // that is the name of the object inside array
+                                _nextToken = JsonToken.FIELD_NAME;
+                                _nextName = _parsingContext.getCurrentName();
+                                _currToken = JsonToken.START_OBJECT;
+                            }
                         } else {
                             _reportError("Expected next field or end of scope, found " + ht);
                         }

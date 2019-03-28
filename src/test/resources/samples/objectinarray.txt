@@ -1,0 +1,7 @@
+technology_folders = {
+    air_techs_folder
+    naval_folder = {
+        available = { always = true }
+    }
+    industry_folder
+}
