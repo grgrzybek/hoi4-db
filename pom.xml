@@ -133,6 +133,7 @@
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <excludes>
+                        <exclude>**/ModelTest.java</exclude>
                         <exclude>**/SteamTest.java</exclude>
                     </excludes>
                 </configuration>
@@ -287,6 +288,7 @@
                             <redirectTestOutputToFile>false</redirectTestOutputToFile>
                             <excludes combine.self="override" />
                             <includes>
+                                <include>**/ModelTest.java</include>
                                 <include>**/SteamTest.java</include>
                             </includes>
                             <systemPropertyVariables>

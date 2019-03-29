@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import grgr.hoi4db.databind.Hoi4DbNodeFactory;
 import grgr.hoi4db.dataformat.Hoi4DbFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -73,7 +74,7 @@ public class SteamTest {
     //                        LOG.info("Parsing {}", p);
                             JsonFactory factory = new Hoi4DbFactory();
                             JsonParser parser = factory.createParser(p.toFile());
-                            prettyPrint(parser, true);
+                            prettyPrint(parser, false);
                             parser.close();
                         } catch (Exception e) {
                             problems.add("Problem processing " + p + ": " + e.getMessage());
@@ -90,7 +91,8 @@ public class SteamTest {
     @Test
     public void bindToMap() throws IOException {
         ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
-        JsonNode tree = mapper.readTree(new File(HOI4_DIR, "history/countries/JAP - Japan.txt"));
+        mapper.setNodeFactory(new Hoi4DbNodeFactory());
+        JsonNode tree = mapper.readTree(new File(HOI4_DIR, "common/units/equipment/modules/00_ship_modules.txt"));
         mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
     }
 

@@ -1,2 +1,39 @@
 
-= Parser utils for Hearts of Iron IV game files
+= Parser utils for Hearts of Iron IV™ game files
+
+This project provides tools and reusable classes to parse and analyze Hearts of Iron IV™ game data files.
+
+== What's provided (work in progress)
+
+Hearts of Iron IV™ data files' syntax (should) conform to what's described in https://hoi4.paradoxwikis.com/Scopes[the wiki]. There are currently https://forum.paradoxplaza.com/forum/index.php?threads/hoi-4-issues-with-game-data-files-when-parsing.1162842/[some problems I've found].
+
+The syntax is a bit similar to JSON, that's why the tools are implemented using https://github.com/FasterXML/jackson-core[Jackson library].
+
+Currently I have implemented:
+
+* streaming implementation of `com.fasterxml.jackson.core.JsonParser` that generates JSON-like events when parsing Hearts of Iron IV™ data files.
+* dedicated `com.fasterxml.jackson.databind.node.JsonNodeFactory` that allows duplicate fields inside objects (scopes).
+
+== How and what to run
+
+Currently everything is still running as JUnit tests. Some tests parse artificial data files and some tests require access to actual Steam library to get real game data files which can't be (I guess) part of git repository.
+
+To run all non-Steam dependant tests, just execute:
+
+    mvn clean test
+
+To run all tests that require game data files, execute (Linux):
+
+    mvn clean test -Dsteam.dir=/data/steam/steamapps/common
+
+(`Hearts of Iron IV` directory is expected to reside in `${steam.dir}`.)
+
+== Data model
+
+Both streaming parser and dedicated jackson-databind classes support construction of Hearts of Iron IV™ data model which I plan to use for:
+
+* generation of stats, tables, spreadsheets
+* comparison of different aspects of naval/air/land equipment between countries
+* ...
+
+Currently I have (manually crafted) https://docs.google.com/spreadsheets/d/173miEiXwHrMjxc3FmWiW1mbFeEufs-BmqAwKAAmDNrI[googledoc spreadsheet with all generic ship designs]. With the datamodel I want to generate more tables and possibly provide special Angular-based application to browse Hearts of Iron IV™ game data files.

@@ -1,6 +1,6 @@
 = Developer information
 
-Hierarchy of `com.fasterxml.jackson.core.JsonParser`:
+== Hierarchy of `com.fasterxml.jackson.core.JsonParser`:
 
 `com.fasterxml.jackson.core.JsonParser`:
 
