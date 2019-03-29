@@ -22,8 +22,12 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import grgr.hoi4db.databind.Hoi4DbNodeFactory;
 import grgr.hoi4db.dataformat.Hoi4DbFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -36,8 +40,23 @@ public class DatabindTest {
     @Test
     public void bindToMap() throws IOException {
         ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
-        mapper.setDefaultMergeable(true);
         JsonNode tree = mapper.readTree(getClass().getResourceAsStream("/samples/noroot.txt"));
+        mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
+    }
+
+    @Test
+    public void bindDuplicateFieldsToMap() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
+        mapper.setNodeFactory(new Hoi4DbNodeFactory());
+        JsonNode tree = mapper.readTree(getClass().getResourceAsStream("/samples/lists.txt"));
+        mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
+    }
+
+    @Test
+    public void bindJustTwoDuplicateFieldsToMap() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
+        mapper.setNodeFactory(new Hoi4DbNodeFactory());
+        JsonNode tree = mapper.readTree(getClass().getResourceAsStream("/samples/duplicates.txt"));
         mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
     }
 

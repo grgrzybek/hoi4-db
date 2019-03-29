@@ -84,6 +84,14 @@ public class ExtractTest {
         parser.close();
     }
 
+    @Test
+    public void readDuplicates() throws Exception {
+        JsonFactory factory = new Hoi4DbFactory();
+        JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/duplicates.txt"));
+        prettyPrint(parser);
+        parser.close();
+    }
+
     /**
      * Prints the tree structure of events and associated names.
      * <em>current name</em> is the name associated with the current token.
