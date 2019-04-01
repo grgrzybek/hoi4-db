@@ -24,7 +24,6 @@ import java.io.StringReader;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.dataformat.csv.CsvFactory;
 import org.junit.jupiter.api.Test;
 
 import static com.fasterxml.jackson.core.JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING;
@@ -68,18 +67,6 @@ public class JsonTest {
         factory.disable(USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
 
         JsonParser parser = factory.createParser("{\"id\": 1, \"name\": \"Grzegorz\", \"address\": {\"street\": \"xyz\", \"v\": [1.2, \"x\"]}, \"code\": \"green\"}");
-        while (parser.nextToken() != null) {
-            System.out.println(parser.currentToken());
-        }
-        parser.close();
-    }
-
-    @Test
-    public void readCsv() throws IOException {
-        JsonFactory factory = new CsvFactory();
-        factory.disable(USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
-
-        JsonParser parser = factory.createParser(new StringReader("a,b,c\n1,2,abc\n"));
         while (parser.nextToken() != null) {
             System.out.println(parser.currentToken());
         }

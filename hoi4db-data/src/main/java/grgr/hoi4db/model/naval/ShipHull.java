@@ -20,24 +20,17 @@ package grgr.hoi4db.model.naval;
 
 import java.math.BigDecimal;
 
-/**
- * Represents an entry from {@code /equipments/*} nodes in {@code common/units/equipment/ship_hull_*.txt}.
- */
-public class ShipHull {
+import grgr.hoi4db.model.HasId;
 
-    private String id;
+/**
+ * Represents an entry from {@code /equipments/*} nodes in {@code common/units/equipment/(ship_hull_|)*.txt}.
+ */
+public class ShipHull extends HasId {
+
     private int year;
     private String type;
 
     private BigDecimal surfaceDetection;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public int getYear() {
         return year;
