@@ -1,0 +1,67 @@
+= Developer information
+
+== Using angular - opinionated version
+
+* https://angular.io/guide/quickstart
+
+`npm init`:
+[source,options=nowrap]
+----
+$ npm init
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help json` for definitive documentation on these fields
+and exactly what they do.
+
+Use `npm install <pkg>` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+package name: (hoi4db-web-angular)
+version: (1.0.0)
+description: Tools for parsing Hearts of Iron IV™ game data files
+entry point: (index.js)
+test command:
+git repository: git@github.com:grgrzybek/hoi4-db.git
+keywords:
+license: (ISC) Apache-2.0
+About to write to /data/sources/github.com/grgrzybek/hoi4-db/hoi4db-web-angular/package.json:
+
+{
+  "name": "hoi4db-web-angular",
+  "version": "1.0.0",
+  "description": "Tools for parsing Hearts of Iron IV™ game data files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/grgrzybek/hoi4-db.git"
+  },
+  "author": "Grzegorz Grzybek <gr.grzybek@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/grgrzybek/hoi4-db/issues"
+  },
+  "homepage": "https://github.com/grgrzybek/hoi4-db#readme"
+}
+
+
+Is this OK? (yes) yes
+----
+
+Install angular/cli (7.3.7 at the time of writing):
+[source,options=nowrap]
+----
+13:50 $ npm install @angular/cli
+npm notice created a lockfile as package-lock.json. You should commit this file.
+npm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@1.2.7 (node_modules/fsevents):
+npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@1.2.7: wanted {"os":"darwin","arch":"any"} (current: {"os":"linux","arch":"x64"})
+
++ @angular/cli@7.3.7
+added 295 packages from 180 contributors and audited 17414 packages in 9.745s
+found 0 vulnerabilities
+----
+

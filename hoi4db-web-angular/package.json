@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/grgrzybek/hoi4-db/issues"
   },
-  "homepage": "https://github.com/grgrzybek/hoi4-db#readme"
+  "homepage": "https://github.com/grgrzybek/hoi4-db#readme",
+  "dependencies": {
+    "@angular/cli": "^7.3.7"
+  }
 }
