@@ -1,0 +1,19 @@
+{
+  "name": "hoi4db-web-angular",
+  "version": "1.0.0",
+  "description": "Tools for parsing Hearts of Iron IV™ game data files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/grgrzybek/hoi4-db.git"
+  },
+  "author": "Grzegorz Grzybek <gr.grzybek@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/grgrzybek/hoi4-db/issues"
+  },
+  "homepage": "https://github.com/grgrzybek/hoi4-db#readme"
+}
