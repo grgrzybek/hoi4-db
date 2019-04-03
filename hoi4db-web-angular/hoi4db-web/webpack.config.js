@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+const CleanWebpackPlugin   = require('clean-webpack-plugin');
+const HtmlWebpackPlugin    = require('html-webpack-plugin');
+
 module.exports = {
   mode: "development",
 
@@ -40,5 +44,10 @@ module.exports = {
       {test: /\.ts$/, loader: "awesome-typescript-loader"},
       {test: /\.js$/, loader: "source-map-loader", enforce: "pre"}
     ]
-  }
+  },
+
+  plugins: [
+    new CleanWebpackPlugin({root: ".", verbose: true}),
+    new HtmlWebpackPlugin({template: './src/index.html'})
+  ]
 };

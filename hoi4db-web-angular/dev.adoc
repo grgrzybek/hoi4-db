@@ -325,3 +325,42 @@ Entrypoint main = bundle.js bundle.js.map
 [./src/app/app.module.ts] 957 bytes {main} [built]
 [./src/main.ts] 1.16 KiB {main} [built]
 ----
+
+.Adding more to webpack configuration
+
+[source,options=nowrap]
+----
+10:58 $ yarn add -D clean-webpack-plugin
+10:58 $ yarn add -D html-webpack-plugin
+----
+
+Now, `./src/index.html` is processed by webpack as well:
+[source,options=nowrap]
+----
+11:10 $ ./node_modules/.bin/webpack
+clean-webpack-plugin: removed dist/bundle.js
+clean-webpack-plugin: removed dist/bundle.js.map
+clean-webpack-plugin: removed dist/index.html
+ℹ ｢atl｣: Using typescript@3.4.1 from typescript
+ℹ ｢atl｣: Using tsconfig.json from /data/sources/github.com/grgrzybek/hoi4-db/hoi4db-web-angular/hoi4db-web/tsconfig.json
+ℹ ｢atl｣: Checking started in a separate process...
+ℹ ｢atl｣: Time: 8ms
+Hash: 7c49d179e482cbd40e11
+Version: webpack 4.29.6
+Time: 1294ms
+Built at: 04/03/2019 11:11:11 AM
+        Asset      Size  Chunks             Chunk Names
+    bundle.js  6.17 KiB    main  [emitted]  main
+bundle.js.map  6.09 KiB    main  [emitted]  main
+   index.html  1.09 KiB          [emitted]
+Entrypoint main = bundle.js bundle.js.map
+[./src/app/app.module.ts] 987 bytes {main} [built]
+[./src/main.ts] 1.16 KiB {main} [built]
+Child html-webpack-plugin for "index.html":
+     1 asset
+    Entrypoint undefined = index.html
+    [./node_modules/html-webpack-plugin/lib/loader.js!./src/index.html] 1.26 KiB {0} [built]
+    [./node_modules/webpack/buildin/global.js] (webpack)/buildin/global.js 472 bytes {0} [built]
+    [./node_modules/webpack/buildin/module.js] (webpack)/buildin/module.js 497 bytes {0} [built]
+        + 1 hidden module
+----
