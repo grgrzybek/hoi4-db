@@ -5,5 +5,8 @@
   "main": "index.js",
   "repository": "git@github.com:grgrzybek/hoi4-db.git",
   "author": "Grzegorz Grzybek <gr.grzybek@gmail.com>",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^3.4.1"
+  }
 }

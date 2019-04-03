@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-window.addEventListener("load", function (ev) {
+window.addEventListener("load", () => {
   console.info("load event");
 });
-document.addEventListener("DOMContentLoaded", function (ev) {
-  console.info("DOMContentLoaded event");
+
+document.addEventListener("DOMContentLoaded", (ev) => {
+  console.info("DOMContentLoaded event: " + ev);
 });

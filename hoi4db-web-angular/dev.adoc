@@ -177,7 +177,8 @@ full Angular 7 (I guess) application using SASS, Typescript, Webpack and Bootstr
 * https://medium.freecodecamp.org/how-to-configure-webpack-4-with-angular-7-a-complete-guide-9a23c879f471
 * https://medium.com/@motcowley/angular-folder-structure-d1809be95542
 
-`yarn` initialization:
+.`yarn` initialization:
+
 [source,options=nowrap]
 ----
 09:29 $ pwd
@@ -208,3 +209,56 @@ Done in 16.68s.
 }
 ----
 
+After `yarn init`, I just created simple src/index.html + src/main.js application.
+
+.Adding typescript
+[source,options=nowrap]
+----
+09:47 $ yarn add -D typescript
+yarn add v1.15.2
+info No lockfile found.
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ typescript@3.4.1
+info All dependencies
+└─ typescript@3.4.1
+Done in 0.48s.
+
+09:47 $ git diff
+diff --git a/hoi4db-web-angular/hoi4db-web/package.json b/hoi4db-web-angular/hoi4db-web/package.json
+index 7340e13..b777795 100644
+--- a/hoi4db-web-angular/hoi4db-web/package.json
++++ b/hoi4db-web-angular/hoi4db-web/package.json
+@@ -5,5 +5,8 @@
+   "main": "index.js",
+   "repository": "git@github.com:grgrzybek/hoi4-db.git",
+   "author": "Grzegorz Grzybek <gr.grzybek@gmail.com>",
+-  "license": "Apache-2.0"
++  "license": "Apache-2.0",
++  "devDependencies": {
++    "typescript": "^3.4.1"
++  }
+ }
+----
+
+Now, `*.ts` files can be compiled to `*.js` with:
+[source,options=nowrap]
+----
+10:07 $ ll src/
+total 8
+-rw-rw-r--. 1 ggrzybek ggrzybek 1127 04-03 09:43 index.html
+-rw-rw-r--. 1 ggrzybek ggrzybek  992 04-03 10:06 main.ts
+
+10:07 $ ./node_modules/.bin/tsc --strict --pretty src/main.ts
+
+10:07 $ ll src/
+total 12
+-rw-rw-r--. 1 ggrzybek ggrzybek 1127 04-03 09:43 index.html
+-rw-rw-r--. 1 ggrzybek ggrzybek 1021 04-03 10:07 main.js
+-rw-rw-r--. 1 ggrzybek ggrzybek  992 04-03 10:06 main.ts
+----
