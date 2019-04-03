@@ -262,3 +262,66 @@ total 12
 -rw-rw-r--. 1 ggrzybek ggrzybek 1021 04-03 10:07 main.js
 -rw-rw-r--. 1 ggrzybek ggrzybek  992 04-03 10:06 main.ts
 ----
+
+.Adding `webpack` and `webpack-cli`
+
+* https://www.typescriptlang.org/docs/handbook/react-&-webpack.html
+
+[source,options=nowrap]
+----
+10:13 $ yarn add -D webpack
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 203 new dependencies.
+info Direct dependencies
+└─ webpack@4.29.6
+info All dependencies
+├─ @webassemblyjs/floating-point-hex-parser@1.8.5
+...
+└─ yallist@3.0.3
+Done in 4.39s.
+
+10:34 $ yarn add -D webpack-cli
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 42 new dependencies.
+info Direct dependencies
+└─ webpack-cli@3.3.0
+info All dependencies
+├─ camelcase@5.3.0
+...
+└─ yargs@12.0.5
+Done in 2.10s.
+----
+
+Then I prepared `webpack.config.js` and run `webpack`:
+[source,options=nowrap]
+----
+10:36 $ ./node_modules/.bin/webpack
+ℹ ｢atl｣: Using typescript@3.4.1 from typescript
+ℹ ｢atl｣: Using tsconfig.json from /data/sources/github.com/grgrzybek/hoi4-db/hoi4db-web-angular/hoi4db-web/tsconfig.json
+ℹ ｢atl｣: Checking started in a separate process...
+ℹ ｢atl｣: Time: 8ms
+Hash: 53e30bf19824fe7946b1
+Version: webpack 4.29.6
+Time: 964ms
+Built at: 04/03/2019 10:37:12 AM
+        Asset      Size  Chunks             Chunk Names
+    bundle.js  6.14 KiB    main  [emitted]  main
+bundle.js.map  6.03 KiB    main  [emitted]  main
+Entrypoint main = bundle.js bundle.js.map
+[./src/app/app.module.ts] 957 bytes {main} [built]
+[./src/main.ts] 1.16 KiB {main} [built]
+----

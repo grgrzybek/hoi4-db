@@ -16,14 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import {hello} from "./app/app.module";
-
-window.addEventListener("load", () => {
-  console.info("load event");
-});
-
-document.addEventListener("DOMContentLoaded", (ev) => {
-  console.info("DOMContentLoaded event: " + ev);
-  console.info("invoking hello(): " + hello());
-});
+export function hello() : string {
+  console.info("Hello!");
+  return "Invoked hello()";
+}

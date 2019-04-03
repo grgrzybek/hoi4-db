@@ -16,14 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+module.exports = {
+  mode: "development",
 
-import {hello} from "./app/app.module";
+  entry: "./src/main.ts",
+  output: {
+    filename: "bundle.js",
+    path: __dirname + "/dist"
+  },
 
-window.addEventListener("load", () => {
-  console.info("load event");
-});
+  // Enable sourcemaps for debugging webpack's output.
+  devtool: "source-map",
 
-document.addEventListener("DOMContentLoaded", (ev) => {
-  console.info("DOMContentLoaded event: " + ev);
-  console.info("invoking hello(): " + hello());
-});
+  resolve: {
+    // Add '.ts' and '.tsx' as resolvable extensions.
+    extensions: [".ts", ".js", ".json"]
+  },
+
+  // awesome-typescript-loader helps Webpack compile your TypeScript code using the
+  // TypeScript’s standard configuration file named tsconfig.json.
+  module: {
+    rules: [
+      {test: /\.ts$/, loader: "awesome-typescript-loader"},
+      {test: /\.js$/, loader: "source-map-loader", enforce: "pre"}
+    ]
+  }
+};
