@@ -133,3 +133,77 @@ found 0 vulnerabilities
 
     Directory is already under version control. Skipping initialization of git.
 ----
+
+Build application (`dist/` dir is already .gitignored):
+[source,options=nowrap]
+----
+14:46 $ ./node_modules/.bin/ng build
+
+Date: 2019-04-02T12:46:27.319Z
+Hash: a27ce23c759a0fe67e8a
+Time: 7112ms
+chunk {es2015-polyfills} es2015-polyfills.js, es2015-polyfills.js.map (es2015-polyfills) 284 kB [initial] [rendered]
+chunk {main} main.js, main.js.map (main) 9.51 kB [initial] [rendered]
+chunk {polyfills} polyfills.js, polyfills.js.map (polyfills) 236 kB [initial] [rendered]
+chunk {runtime} runtime.js, runtime.js.map (runtime) 6.08 kB [entry] [rendered]
+chunk {styles} styles.js, styles.js.map (styles) 16.7 kB [initial] [rendered]
+chunk {vendor} vendor.js, vendor.js.map (vendor) 3.44 MB [initial] [rendered]
+----
+
+Serve application:
+[source,options=nowrap]
+----
+14:47 $ ./node_modules/.bin/ng serve # or `npm run ng serve`
+** Angular Live Development Server is listening on localhost:4200, open your browser on http://localhost:4200/ **
+
+Date: 2019-04-02T12:49:49.152Z
+Hash: cc59973112fb189b9d0d
+Time: 7149ms
+chunk {es2015-polyfills} es2015-polyfills.js, es2015-polyfills.js.map (es2015-polyfills) 284 kB [initial] [rendered]
+chunk {main} main.js, main.js.map (main) 10.8 kB [initial] [rendered]
+chunk {polyfills} polyfills.js, polyfills.js.map (polyfills) 236 kB [initial] [rendered]
+chunk {runtime} runtime.js, runtime.js.map (runtime) 6.08 kB [entry] [rendered]
+chunk {styles} styles.js, styles.js.map (styles) 16.7 kB [initial] [rendered]
+chunk {vendor} vendor.js, vendor.js.map (vendor) 3.76 MB [initial] [rendered]
+ℹ ｢wdm｣: Compiled successfully.
+----
+
+== Using angular - from scratch version (long)
+
+`hoi4db-web` will be a root directory for JS/TS-only web application (no Java) that goes from trivial html+js+css to
+full Angular 7 (I guess) application using SASS, Typescript, Webpack and Bootstrap, but without using angular-cli.
+
+* https://medium.com/the-node-js-collection/modern-javascript-explained-for-dinosaurs-f695e9747b70
+* https://medium.freecodecamp.org/how-to-configure-webpack-4-with-angular-7-a-complete-guide-9a23c879f471
+
+`yarn` initialization:
+[source,options=nowrap]
+----
+09:29 $ pwd
+/home/ggrzybek/sources/github.com/grgrzybek/hoi4-db/hoi4db-web-angular/hoi4db-web
+
+09:30 $ yarn init
+yarn init v1.15.2
+question name (hoi4db-web):
+question version (1.0.0): 0.1.0
+question description: Tools for parsing Hearts of Iron IV™ game data files
+question entry point (index.js):
+question repository url: git@github.com:grgrzybek/hoi4-db.git
+question author (Grzegorz Grzybek <gr.grzybek@gmail.com>):
+question license (MIT): Apache-2.0
+question private:
+success Saved package.json
+Done in 16.68s.
+
+09:30 $ cat package.json
+{
+  "name": "hoi4db-web",
+  "version": "0.1.0",
+  "description": "Tools for parsing Hearts of Iron IV™ game data files",
+  "main": "index.js",
+  "repository": "git@github.com:grgrzybek/hoi4-db.git",
+  "author": "Grzegorz Grzybek <gr.grzybek@gmail.com>",
+  "license": "Apache-2.0"
+}
+----
+
