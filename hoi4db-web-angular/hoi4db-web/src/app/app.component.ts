@@ -17,20 +17,13 @@
  * under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
+import {Component} from '@angular/core';
 
-import {AppComponent} from './app.component';
-
-@NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+@Component({
+  selector: "hoi4db-app",
+  template: "<span>{{title}}</span>",
+  styles: []
 })
-export class AppModule {
+export class AppComponent {
+  title = "Hello!"
 }

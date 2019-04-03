@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import {hello} from "./app/app.module";
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {AppModule} from './app/app.module';
 
-window.addEventListener("load", () => {
-  console.info("load event");
-});
-
-document.addEventListener("DOMContentLoaded", (ev) => {
-  console.info("DOMContentLoaded event: " + ev);
-  console.info("invoking hello(): " + hello());
-});
+platformBrowserDynamic()
+    .bootstrapModule(AppModule)
+    .catch(err => console.error(err));

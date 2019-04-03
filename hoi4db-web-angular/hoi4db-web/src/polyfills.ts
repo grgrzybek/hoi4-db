@@ -17,20 +17,8 @@
  * under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
+// https://github.com/angular/angular/issues/26128#issuecomment-425511902
+import 'core-js/es7/reflect';
 
-import {AppComponent} from './app.component';
-
-@NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
-export class AppModule {
-}
+// Zone JS is required by default for Angular itself.
+import 'zone.js/dist/zone';

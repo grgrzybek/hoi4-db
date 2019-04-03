@@ -23,10 +23,13 @@ const HtmlWebpackPlugin    = require('html-webpack-plugin');
 module.exports = {
   mode: "development",
 
-  entry: "./src/main.ts",
+  entry: {
+    polyfills: "./src/polyfills.ts",
+    main: "./src/main.ts"
+  },
   output: {
-    filename: "bundle.js",
-    path: __dirname + "/dist"
+    path: __dirname + "/dist",
+    filename: "[name].js"
   },
 
   // Enable sourcemaps for debugging webpack's output.

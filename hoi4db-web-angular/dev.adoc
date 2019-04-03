@@ -153,7 +153,7 @@ chunk {vendor} vendor.js, vendor.js.map (vendor) 3.44 MB [initial] [rendered]
 Serve application:
 [source,options=nowrap]
 ----
-14:47 $ ./node_modules/.bin/ng serve # or `npm run ng serve`
+14:47 $ ./node_modules/.bin/ng serve # or `npm run ng serve` or even `npx ng serve`
 ** Angular Live Development Server is listening on localhost:4200, open your browser on http://localhost:4200/ **
 
 Date: 2019-04-02T12:49:49.152Z
@@ -364,3 +364,174 @@ Child html-webpack-plugin for "index.html":
     [./node_modules/webpack/buildin/module.js] (webpack)/buildin/module.js 497 bytes {0} [built]
         + 1 hidden module
 ----
+
+.Adding Angular (without CLI)
+
+[source,options=nowrap]
+----
+11:34 $ yarn add @angular/core
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+warning " > @angular/core@7.2.11" has unmet peer dependency "rxjs@^6.0.0".
+warning " > @angular/core@7.2.11" has unmet peer dependency "zone.js@~0.8.26".
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ @angular/core@7.2.11
+info All dependencies
+└─ @angular/core@7.2.11
+Done in 2.56s.
+
+11:34 $ yarn add zone.js@~0.8.26
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+warning " > @angular/core@7.2.11" has unmet peer dependency "rxjs@^6.0.0".
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ zone.js@0.8.29
+info All dependencies
+└─ zone.js@0.8.29
+Done in 6.86s.
+
+11:35 $ yarn add rxjs@^6.0.0
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ rxjs@6.4.0
+info All dependencies
+└─ rxjs@6.4.0
+Done in 3.51s.
+
+11:36 $ yarn add @angular/platform-browser
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+warning " > @angular/platform-browser@7.2.11" has unmet peer dependency "@angular/common@7.2.11".
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ @angular/platform-browser@7.2.11
+info All dependencies
+└─ @angular/platform-browser@7.2.11
+Done in 2.19s.
+
+11:36 $ yarn add @angular/common
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ @angular/common@7.2.11
+info All dependencies
+└─ @angular/common@7.2.11
+Done in 3.43s.
+
+12:32 $ yarn add @angular/compiler
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ @angular/compiler@7.2.11
+info All dependencies
+└─ @angular/compiler@7.2.11
+Done in 2.81s.
+
+12:33 $ yarn add @angular/platform-browser-dynamic
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ @angular/platform-browser-dynamic@7.2.11
+info All dependencies
+└─ @angular/platform-browser-dynamic@7.2.11
+Done in 2.18s.
+
+$ yarn add zone.js@~0.8.26
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ zone.js@0.8.29
+info All dependencies
+└─ zone.js@0.8.29
+Done in 2.02s.
+
+$ yarn add core-js
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ core-js@3.0.0
+info All dependencies
+└─ core-js@3.0.0
+Done in 2.78s.
+
+$ yarn add rxjs
+yarn add v1.15.2
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+info fsevents@1.2.7: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 1 new dependency.
+info Direct dependencies
+└─ rxjs@6.4.0
+info All dependencies
+└─ rxjs@6.4.0
+Done in 1.86s.
+----
+
+* `@angular/platform-browser-dynamic` is needed for JIT compiler
