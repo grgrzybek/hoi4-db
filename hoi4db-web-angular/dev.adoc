@@ -175,6 +175,7 @@ full Angular 7 (I guess) application using SASS, Typescript, Webpack and Bootstr
 
 * https://medium.com/the-node-js-collection/modern-javascript-explained-for-dinosaurs-f695e9747b70
 * https://medium.freecodecamp.org/how-to-configure-webpack-4-with-angular-7-a-complete-guide-9a23c879f471
+* https://medium.com/@motcowley/angular-folder-structure-d1809be95542
 
 `yarn` initialization:
 [source,options=nowrap]
