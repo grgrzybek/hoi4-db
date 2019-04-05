@@ -17,8 +17,9 @@
  * under the License.
  */
 
-const CleanWebpackPlugin   = require('clean-webpack-plugin');
-const HtmlWebpackPlugin    = require('html-webpack-plugin');
+const path = require('path');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: "development",
@@ -29,28 +30,58 @@ module.exports = {
   },
   output: {
     path: __dirname + "/dist",
-    filename: "[name].js"
+    filename: "[name].js",
+    chunkFilename: "[id].chunk.js",
+    publicPath: "/",
   },
 
   // Enable sourcemaps for debugging webpack's output.
   devtool: "source-map",
+
+  devServer: {
+    contentBase: './dist',
+    writeToDisk: true,
+    historyApiFallback: true
+  },
 
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: [".ts", ".js", ".json"]
   },
 
-  // awesome-typescript-loader helps Webpack compile your TypeScript code using the
-  // TypeScript’s standard configuration file named tsconfig.json.
   module: {
     rules: [
-      {test: /\.ts$/, loader: "awesome-typescript-loader"},
-      {test: /\.js$/, loader: "source-map-loader", enforce: "pre"}
+      {test: /\.html$/, loader: "html-loader"},
+      // awesome-typescript-loader helps Webpack compile your TypeScript code using the
+      // TypeScript’s standard configuration file named tsconfig.json.
+      {
+        test: /\.ts$/, loaders: [
+          "awesome-typescript-loader",
+          "angular2-template-loader",
+          "angular-router-loader"
+        ]
+      },
+      {test: /\.js$/, loader: "source-map-loader", enforce: "pre"},
+      {
+        test: /\.scss$/, use: [
+          {loader: 'style-loader'},
+          {loader: 'css-loader'},
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: function () {
+                return [require('autoprefixer')];
+              }
+            }
+          },
+          {loader: 'sass-loader'}
+        ]
+      }
     ]
   },
 
   plugins: [
-    new CleanWebpackPlugin({root: ".", verbose: true}),
+    new CleanWebpackPlugin({root: "./dist", verbose: true}),
     new HtmlWebpackPlugin({template: './src/index.html'})
   ]
 };

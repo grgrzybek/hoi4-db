@@ -20,10 +20,12 @@
 import {Component} from '@angular/core';
 
 @Component({
-  selector: "hoi4db-app",
-  templateUrl: "./app.component.html",
+  // Selectors are not required for routed components due to the components are dynamically inserted when the page
+  // is rendered, but are useful for identifying and targeting them in your HTML element tree.
+  // selector: "",
+  templateUrl: "./welcome.component.html",
   styles: []
 })
-export class AppComponent {
-  title = "Hello!"
+export class WelcomeComponent {
+  title = "Welcome"
 }

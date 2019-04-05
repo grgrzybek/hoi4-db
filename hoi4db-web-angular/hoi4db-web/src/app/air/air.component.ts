@@ -20,10 +20,8 @@
 import {Component} from '@angular/core';
 
 @Component({
-  selector: "hoi4db-app",
-  templateUrl: "./app.component.html",
-  styles: []
+  templateUrl: './air.component.html'
 })
-export class AppComponent {
-  title = "Hello!"
+export class AirComponent {
+  title = "Air units";
 }

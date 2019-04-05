@@ -20,10 +20,7 @@
 import {Component} from '@angular/core';
 
 @Component({
-  selector: "hoi4db-app",
-  templateUrl: "./app.component.html",
-  styles: []
+  templateUrl: './land.component.html'
 })
-export class AppComponent {
-  title = "Hello!"
+export class LandComponent {
 }
