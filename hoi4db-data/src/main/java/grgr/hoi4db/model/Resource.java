@@ -18,32 +18,17 @@
  */
 package grgr.hoi4db.model;
 
-/**
- * Every definition has ID - it's the field name in JSONish game data file.
- */
-public class HasId {
+public enum Resource {
 
-    private String id;
-    private String parentId;
+    OIL,
+    ALUMINIUM,
+    RUBBER,
+    TUNGSTEN,
+    STEEL,
+    CHROMIUM;
 
-    public HasId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
+    public static Resource byName(String name) {
+        return valueOf(name.toUpperCase());
     }
 
 }

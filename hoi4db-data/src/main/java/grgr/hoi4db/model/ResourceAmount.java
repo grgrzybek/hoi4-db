@@ -18,32 +18,37 @@
  */
 package grgr.hoi4db.model;
 
-/**
- * Every definition has ID - it's the field name in JSONish game data file.
- */
-public class HasId {
+import java.math.BigInteger;
 
-    private String id;
-    private String parentId;
+public class ResourceAmount {
 
-    public HasId(String id) {
-        this.id = id;
+    private Resource resource;
+    private BigInteger amount;
+
+    public ResourceAmount(Resource resource, BigInteger amount) {
+        this.resource = resource;
+        this.amount = amount;
     }
 
-    public String getId() {
-        return id;
+    public Resource getResource() {
+        return resource;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setResource(Resource resource) {
+        this.resource = resource;
     }
 
-    public String getParentId() {
-        return parentId;
+    public BigInteger getAmount() {
+        return amount;
     }
 
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s=%d", resource, amount);
     }
 
 }

@@ -30,6 +30,10 @@ public class ShipHull extends HasId {
     private int year;
     private String type;
 
+    public ShipHull(String id) {
+        super(id);
+    }
+
     private BigDecimal surfaceDetection;
 
     public int getYear() {

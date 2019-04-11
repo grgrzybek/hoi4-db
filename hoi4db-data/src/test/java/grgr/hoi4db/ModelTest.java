@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 import grgr.hoi4db.dao.NavalData;
+import grgr.hoi4db.model.naval.Module;
 import grgr.hoi4db.model.naval.ShipHull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,14 @@ public class ModelTest {
         NavalData nd = new NavalData(HOI4_DIR);
         for (ShipHull sh : nd.hulls()) {
             System.out.println(sh);
+        }
+    }
+
+    @Test
+    public void readNavalModules() throws IOException {
+        NavalData nd = new NavalData(HOI4_DIR);
+        for (Module m : nd.modules()) {
+            System.out.println(m);
         }
     }
 
