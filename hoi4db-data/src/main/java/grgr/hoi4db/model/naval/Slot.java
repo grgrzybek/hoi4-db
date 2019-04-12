@@ -18,24 +18,40 @@
  */
 package grgr.hoi4db.model.naval;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import grgr.hoi4db.model.HasId;
+
 /**
- * Ordering enum to group/sort ship modules.
+ * Single slot for ship modules that can be used for any ship hull
  */
-public enum ModuleCategoryGroup {
+public class Slot extends HasId {
 
-    ENGINE(1),
-    ARMOR(2),
-    BATTERY(3),
-    OTHER(10);
+    private boolean required;
+    private List<ModuleCategory> categoriesAllowed = new LinkedList<>();
 
-    private final int order;
-
-    ModuleCategoryGroup(int order) {
-        this.order = order;
+    public Slot(String id) {
+        super(id);
     }
 
-    public int getOrder() {
-        return order;
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    public List<ModuleCategory> getCategoriesAllowed() {
+        return categoriesAllowed;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s%s: %s", getId(), required ? "*" : "",
+                categoriesAllowed.stream().map(ModuleCategory::toString).collect(Collectors.joining(", ")));
     }
 
 }

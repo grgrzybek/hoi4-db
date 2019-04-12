@@ -26,7 +26,7 @@ import java.math.BigInteger;
  */
 public class Stat extends HasId {
 
-    private static final BigDecimal BD_100 = new BigDecimal(100);
+    public static final BigDecimal BD_100 = new BigDecimal(100);
 
     private Number value;
     private Operation operation;

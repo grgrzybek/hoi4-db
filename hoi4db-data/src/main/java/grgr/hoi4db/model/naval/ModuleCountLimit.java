@@ -18,24 +18,35 @@
  */
 package grgr.hoi4db.model.naval;
 
+import grgr.hoi4db.model.Constraint;
+
 /**
- * Ordering enum to group/sort ship modules.
+ * Limit on number of modules from given category used in ship hull's slots
  */
-public enum ModuleCategoryGroup {
+public class ModuleCountLimit {
 
-    ENGINE(1),
-    ARMOR(2),
-    BATTERY(3),
-    OTHER(10);
+    private ModuleCategory moduleCategory;
+    private Constraint limit;
 
-    private final int order;
-
-    ModuleCategoryGroup(int order) {
-        this.order = order;
+    public ModuleCategory getModuleCategory() {
+        return moduleCategory;
     }
 
-    public int getOrder() {
-        return order;
+    public void setModuleCategory(ModuleCategory moduleCategory) {
+        this.moduleCategory = moduleCategory;
+    }
+
+    public Constraint getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Constraint limit) {
+        this.limit = limit;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", moduleCategory, limit);
     }
 
 }

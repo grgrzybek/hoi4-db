@@ -16,26 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package grgr.hoi4db.model.naval;
+package grgr.hoi4db.model;
 
-/**
- * Ordering enum to group/sort ship modules.
- */
-public enum ModuleCategoryGroup {
+public enum DLC {
 
-    ENGINE(1),
-    ARMOR(2),
-    BATTERY(3),
-    OTHER(10);
+    VANILLA(null),
+    PUAR("Poland: United and Ready"),
+    TFV("Together for Victory"),
+    DOD("Death or Dishonor"),
+    WTT("Waking the Tiger"),
+    MTG("Man the Guns");
 
-    private final int order;
+    private String id;
 
-    ModuleCategoryGroup(int order) {
-        this.order = order;
+    DLC(String id) {
+        this.id = id;
     }
 
-    public int getOrder() {
-        return order;
+    public String getId() {
+        return id;
+    }
+
+    public static DLC byName(String name) {
+        for (DLC dlc : values()) {
+            if (dlc.id.equals(name)) {
+                return dlc;
+            }
+        }
+        return null;
     }
 
 }

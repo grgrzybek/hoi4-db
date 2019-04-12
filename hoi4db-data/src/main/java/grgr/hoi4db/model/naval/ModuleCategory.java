@@ -18,6 +18,9 @@
  */
 package grgr.hoi4db.model.naval;
 
+/**
+ * Enum to group/sort ship modules within categories and groups of categories.
+ */
 public enum ModuleCategory {
 
     LIGHT_SHIP_ENGINE(ModuleCategoryGroup.ENGINE, 1),

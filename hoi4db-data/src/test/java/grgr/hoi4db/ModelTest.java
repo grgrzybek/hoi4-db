@@ -24,6 +24,7 @@ import java.io.IOException;
 import grgr.hoi4db.dao.NavalData;
 import grgr.hoi4db.model.naval.Module;
 import grgr.hoi4db.model.naval.ShipHull;
+import grgr.hoi4db.model.upgrades.NavalUpgrade;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -49,6 +50,11 @@ public class ModelTest {
         NavalData nd = new NavalData(HOI4_DIR);
         for (ShipHull sh : nd.hulls()) {
             System.out.println(sh);
+            System.out.println("slots:");
+            sh.getSlots().forEach((id, slot) -> {
+                Module m = sh.getModules().get(id);
+                System.out.printf(" - %s: %s\n", slot, m == null ? "<empty>" : m);
+            });
         }
     }
 
@@ -57,6 +63,14 @@ public class ModelTest {
         NavalData nd = new NavalData(HOI4_DIR);
         for (Module m : nd.modules()) {
             System.out.println(m);
+        }
+    }
+
+    @Test
+    public void readNavalUpgrades() throws IOException {
+        NavalData nd = new NavalData(HOI4_DIR);
+        for (NavalUpgrade nu : nd.upgrades()) {
+            System.out.println(nu);
         }
     }
 
