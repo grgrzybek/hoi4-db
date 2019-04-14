@@ -33,6 +33,8 @@ import grgr.hoi4db.model.Stat;
  */
 public class Module extends HasId implements Comparable<Module> {
 
+    public static final Module EMPTY = new Module("empty");
+
     private Module parent;
 
     private ModuleCategory category;
@@ -55,8 +57,20 @@ public class Module extends HasId implements Comparable<Module> {
     private BigInteger dismantleCost = BigInteger.ZERO;
     private List<ResourceAmount> dismantleCostResources = new LinkedList<>();
 
+    private boolean unknown = false;
+
     public Module(String id) {
         super(id);
+    }
+
+    public static Module unknown(String id) {
+        Module module = new Module(id);
+        module.unknown = true;
+        return module;
+    }
+
+    public boolean isUnknown() {
+        return unknown;
     }
 
     public Module getParent() {
@@ -131,6 +145,12 @@ public class Module extends HasId implements Comparable<Module> {
 
     @Override
     public String toString() {
+        if (this == EMPTY) {
+            return "<empty>";
+        }
+        if (this.unknown) {
+            return "<unknown: " + getId() + ">";
+        }
         return String.format("%s/%s (parent=%s, dismantleCost=%d, stats=[%s], conversions=[%s], resources=[%s], dismantleCostResources=[%s])", category, getId(), getParentId(),
                 dismantleCost,
                 stats.stream().map(Stat::toString).collect(Collectors.joining(", ")),

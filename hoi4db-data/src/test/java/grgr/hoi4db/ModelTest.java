@@ -24,6 +24,7 @@ import java.io.IOException;
 import grgr.hoi4db.dao.NavalData;
 import grgr.hoi4db.model.naval.Module;
 import grgr.hoi4db.model.naval.ShipHull;
+import grgr.hoi4db.model.naval.Slot;
 import grgr.hoi4db.model.upgrades.NavalUpgrade;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,8 @@ public class ModelTest {
             System.out.println("slots:");
             sh.getSlots().forEach((id, slot) -> {
                 Module m = sh.getModules().get(id);
-                System.out.printf(" - %s: %s\n", slot, m == null ? "<empty>" : m);
+                System.out.printf(" %s %s: %s\n", m == Module.EMPTY ? "-" : (m.isUnknown() ? "?" : "+"),
+                        slot == Slot.INHERITED ? id + " (inherited)" : slot.getId(), m.getId());
             });
         }
     }

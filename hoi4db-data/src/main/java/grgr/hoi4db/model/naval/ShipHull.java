@@ -51,6 +51,7 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
     private String interfaceCategory;
 
 //    private int priority;
+//    private String visual_level;
 //    private String alias;
 
     private List<String> types = new LinkedList<>();
@@ -391,7 +392,9 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
         sh.getResources().addAll(getResources());
         sh.getModuleLimits().addAll(getModuleLimits());
 
-        sh.getSlots().putAll(getSlots());
+        // don't copy slots
+//        sh.getSlots().putAll(getSlots());
+
         sh.getModules().putAll(getModules());
 
         return sh;

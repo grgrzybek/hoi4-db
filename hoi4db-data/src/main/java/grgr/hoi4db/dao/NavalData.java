@@ -46,11 +46,15 @@ import grgr.hoi4db.model.naval.ModuleCountLimit;
 import grgr.hoi4db.model.naval.ShipHull;
 import grgr.hoi4db.model.naval.Slot;
 import grgr.hoi4db.model.upgrades.NavalUpgrade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Accesses naval-related data
  */
 public class NavalData {
+
+    public static Logger LOG = LoggerFactory.getLogger(NavalData.class);
 
     private static String[] MODULE_DEFINITIONS = new String[] {
             "common/units/equipment/modules/00_ship_modules.txt"
@@ -62,10 +66,10 @@ public class NavalData {
 
     private static String[] HULL_DEFINITIONS = new String[] {
             "common/units/equipment/ship_hull_light.txt",
-//            "common/units/equipment/ship_hull_cruiser.txt",
-//            "common/units/equipment/ship_hull_heavy.txt",
-//            "common/units/equipment/ship_hull_carrier.txt",
-//            "common/units/equipment/ship_hull_submarine.txt"
+            "common/units/equipment/ship_hull_cruiser.txt",
+            "common/units/equipment/ship_hull_heavy.txt",
+            "common/units/equipment/ship_hull_carrier.txt",
+            "common/units/equipment/ship_hull_submarine.txt"
     };
 
     private File hoi4Dir;
@@ -84,7 +88,7 @@ public class NavalData {
             modules.put(m.getId(), m);
         });
 
-        // first collect archetypes as template
+        // first collect archetypes as template for buildable models
         withFileSet(HULL_DEFINITIONS, (tree) -> {
             tree.get("equipments").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
@@ -96,24 +100,38 @@ public class NavalData {
                 sh.setBuildable(false);
 
                 processShipHull(sh, v, modules);
+                processShipHullModuleSlots(sh, v, modules);
+
                 byId.put(sh.getId(), sh);
             });
         });
 
-        // and now non-archetypes
+        // and now non-archetypes - all values except for module_slots are taken from archetype
+        // module_slots may be taken from parent models (using "inherit")
+        // TODO: seems like "type" comes from parent instead...
+        // also ship_hull_cruiser_panzerschiff gets type=screen from archetype, as it has no parent
         withFileSet(HULL_DEFINITIONS, (tree) -> {
             tree.get("equipments").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
                 if (v.has("is_archetype") && v.get("is_archetype").asBoolean()) {
                     return;
                 }
-                ShipHull sh = v.has("archetype")
-                        ? byId.get(v.get("archetype").asText()).copy(e.getKey())
-                        : new ShipHull(e.getKey());
+                // assumes ordered declaration...
+                ShipHull sh = null;
+                if (v.has("parent")) {
+                    sh = byId.get(v.get("parent").asText()).copy(e.getKey());
+                } else if (v.has("archetype")) {
+                    sh = byId.get(v.get("archetype").asText()).copy(e.getKey());
+                } else {
+                    sh = new ShipHull(e.getKey());
+                }
+
                 sh.setArchetype(false);
                 sh.setBuildable(true);
 
                 processShipHull(sh, v, modules);
+                processShipHullModuleSlots(sh, v, modules);
+
                 byId.put(sh.getId(), sh);
                 hulls.add(sh);
             });
@@ -123,6 +141,117 @@ public class NavalData {
             if (sh.getParentId() != null && byId.containsKey(sh.getParentId())) {
                 sh.setParent(byId.get(sh.getParentId()));
             }
+        });
+
+        // reorganize module_slots from archetype and parent hulls
+        Map<String, ShipHull> toProcess = new HashMap<>(byId);
+
+        toProcess.entrySet().removeIf(e -> !e.getValue().getSlots().isEmpty()
+                && e.getValue().getSlots().values().stream().noneMatch(s -> s == Slot.INHERITED));
+        while (!toProcess.isEmpty()) {
+            ShipHull sh = toProcess.values().iterator().next();
+            while (sh.getParentId() != null && toProcess.containsKey(sh.getParentId())) {
+                sh = sh.getParent();
+            }
+            String parentId = null;
+            if (sh.getParentId() != null) {
+                parentId = sh.getParentId();
+            } else if (sh.getArchetypeId() != null) {
+                parentId = sh.getArchetypeId();
+            } else {
+                throw new IllegalStateException("Can't determine slots for ship hull \"" + sh.getId() + "\"");
+            }
+            final ShipHull parent = byId.get(parentId);
+            if (sh.getSlots().isEmpty()) {
+                // copy from parent
+                sh.getSlots().putAll(parent.getSlots());
+            } else {
+                // copy only inherited ones
+                Map<String, Slot> newSlots = new LinkedHashMap<>();
+                sh.getSlots().forEach((id, slot) -> {
+                    newSlots.put(id, slot == Slot.INHERITED ? parent.getSlots().get(id) : slot);
+                });
+                sh.getSlots().clear();
+                sh.getSlots().putAll(newSlots);
+            }
+            toProcess.remove(sh.getId());
+        }
+
+        // and process default_modules - even for archetype
+        withFileSet(HULL_DEFINITIONS, (tree) -> {
+            tree.get("equipments").fields().forEachRemaining(e1 -> {
+                JsonNode v = e1.getValue();
+                ShipHull sh = byId.get(e1.getKey());
+
+                if (v.has("default_modules")) {
+                    v.get("default_modules").fields().forEachRemaining(e -> {
+                        String slotId = e.getKey();
+                        if (!sh.getSlots().containsKey(slotId)) {
+                            throw new IllegalArgumentException("Can't find slot ID \"" + slotId + "\" for ship hull \"" + sh.getId() + "\"");
+                        }
+                        String moduleId = e.getValue().asText();
+                        Module m = modules.get(moduleId);
+                        if ("empty".equals(moduleId)) {
+                            // slot is not used
+                            sh.getModules().put(e.getKey(), Module.EMPTY);
+                        } else if (m == null) {
+                            LOG.error("Can't find module \"" + moduleId + "\" for slot \"" + slotId + "\" in ship hull \"" + sh.getId() + "\"");
+                            sh.getModules().put(e.getKey(), Module.unknown(moduleId));
+                        } else {
+                            Slot slot = sh.getSlots().get(slotId);
+                            Optional<ModuleCategory> c = slot.getCategoriesAllowed().stream().filter(mc -> mc.equals(m.getCategory())).findAny();
+                            if (!c.isPresent()) {
+                                throw new IllegalArgumentException("Module \"" + moduleId + "\" with category \"" + m.getCategory() + "\" can't be installed in slot " + slot + " of hull " + sh.getId());
+                            }
+                            sh.getModules().put(e.getKey(), m);
+                        }
+                    });
+                }
+            });
+        });
+
+        // reorganize default_modules from archetype and parent hulls
+        toProcess = new HashMap<>(byId);
+
+        while (!toProcess.isEmpty()) {
+            ShipHull sh = toProcess.values().iterator().next();
+            while (sh.getParentId() != null && toProcess.containsKey(sh.getParentId())) {
+                sh = byId.get(sh.getParentId());
+            }
+            String parentId = null;
+            if (sh.getParentId() != null) {
+                parentId = sh.getParentId();
+            } else if (sh.getArchetypeId() != null) {
+                parentId = sh.getArchetypeId();
+            } else {
+                // can't find parent - not inheriting anything
+                toProcess.remove(sh.getId());
+                continue;
+            }
+            final ShipHull parent = byId.get(parentId);
+            if (parent == null) {
+                throw new IllegalStateException("Can't determine modules for ship hull \"" + sh.getId() + "\"");
+            } else {
+                // copy modules from parent and override with ours
+                if (sh.getModules().isEmpty()) {
+                    // just copy
+                    sh.getModules().putAll(parent.getModules());
+                } else {
+                    // take parent's and override with ours
+                    Map<String, Module> ours = new LinkedHashMap<>(sh.getModules());
+                    sh.getModules().clear();
+                    sh.getModules().putAll(parent.getModules());
+                    sh.getModules().putAll(ours);
+                }
+                toProcess.remove(sh.getId());
+            }
+        }
+
+        // fill empty slots with EMPTY module
+        hulls.forEach(sh -> {
+            sh.getSlots().values().forEach(s -> {
+                sh.getModules().putIfAbsent(s.getId(), Module.EMPTY);
+            });
         });
 
         // this list won't contain archetypes
@@ -236,6 +365,9 @@ public class NavalData {
         if (v.has("parent")) {
             sh.setParentId(v.get("parent").asText());
         }
+        if (v.has("archetype")) {
+            sh.setArchetypeId(v.get("archetype").asText());
+        }
         if (v.has("year")) {
             sh.setYear(v.get("year").asInt());
         }
@@ -320,78 +452,78 @@ public class NavalData {
             });
         }
         if (v.has("module_count_limit")) {
-            v.get("module_count_limit").elements().forEachRemaining(limit -> {
+            JsonNode limits = v.get("module_count_limit");
+            if (limits.isArray()) {
+                limits.elements().forEachRemaining(limit -> {
+                    ModuleCountLimit mcl = new ModuleCountLimit();
+                    Constraint c = new Constraint("count", limit.get("count").asText());
+                    mcl.setLimit(c);
+                    mcl.setModuleCategory(ModuleCategory.byName(limit.get("category").asText()));
+                    sh.getModuleLimits().add(mcl);
+                });
+            } else if (limits.isObject()) {
                 ModuleCountLimit mcl = new ModuleCountLimit();
-                Constraint c = new Constraint("count", limit.get("count").asText());
+                Constraint c = new Constraint("count", limits.get("count").asText());
                 mcl.setLimit(c);
-                mcl.setModuleCategory(ModuleCategory.byName(limit.get("category").asText()));
+                mcl.setModuleCategory(ModuleCategory.byName(limits.get("category").asText()));
                 sh.getModuleLimits().add(mcl);
-            });
+            }
         }
+    }
+
+    public void processShipHullModuleSlots(ShipHull sh, JsonNode v, Map<String, Module> modules) {
         if (v.has("module_slots")) {
+            // we may have:
+            // 1. module_slots = inherit # everything is inherited from parent (or archetype if there's no parent)
+            // 2. module_slots = { x1 = yy x2 = inherit ... } # selected slot is inherited
+            // 3. module_slots = { x1 = yy x2 = x1 ... } # copy of slot from the same module_slots
+
             Map<String, Slot> slots = new LinkedHashMap<>();
             Map<String, String> refs = new HashMap<>();
             JsonNode declaredSlots = v.get("module_slots");
 
-            // first, inherit
-            Map<String, Slot> inherited = new LinkedHashMap<>(sh.getSlots());
-            sh.getSlots().clear();
-
-            if (declaredSlots != null && declaredSlots.isTextual() && "inherit".equals(declaredSlots.asText())) {
-                sh.getSlots().putAll(inherited);
-            } else if (declaredSlots != null) {
-                declaredSlots.fields().forEachRemaining(s -> {
-                    Slot slot = new Slot(s.getKey());
-                    if (s.getValue().isTextual()) {
-                        if (s.getValue().asText().equals("inherit")) {
-                            // inherited from parent hull
-                            slot = inherited.get(s.getKey());
-                            if (slot == null) {
-                                throw new IllegalArgumentException("Can't find slot with id=" + s.getKey() + " in inherited slot definitions");
-                            }
-                        } else {
-                            // a reference to slot from current hull - to be resolved later
-                            refs.put(s.getKey(), s.getValue().asText());
+            if (declaredSlots != null) {
+                if (declaredSlots.isTextual() && "inherit".equals(declaredSlots.asText())) {
+                    // we may inherit later from parent, instead of from archetype
+                    sh.getSlots().clear();
+                } else if (declaredSlots.isArray()) {
+                    // a duplicate "module_slots = inherit" in some definitions
+                    declaredSlots.elements().forEachRemaining(e -> {
+                        if ("inherit".equals(e.asText())) {
+                            // we may inherit later from parent, instead of from archetype
+                            sh.getSlots().clear();
                         }
-                    } else if (s.getValue().isObject()) {
-                        // overriden
-                        final Slot sl = new Slot(s.getKey());
-                        s.getValue().get("allowed_module_categories").elements().forEachRemaining(e -> {
-                            sl.getCategoriesAllowed().add(ModuleCategory.byName(e.asText()));
-                        });
-                        sl.setRequired(s.getValue().get("required").asBoolean());
-                        slot = sl;
-                    }
-                    slots.put(slot.getId(), slot);
-                });
-                refs.forEach((k, ref) -> {
-                    slots.get(k).getCategoriesAllowed().addAll(slots.get(ref).getCategoriesAllowed());
-                });
-            }
-            sh.getSlots().putAll(slots);
-        }
-        if (v.has("default_modules")) {
-            v.get("default_modules").fields().forEachRemaining(e -> {
-                String slotId = e.getKey();
-                if (!sh.getSlots().containsKey(slotId)) {
-                    throw new IllegalArgumentException("Can't find slot ID \"" + slotId + "\" for ship hull \"" + sh.getId() + "\"");
-                }
-                String moduleId = e.getValue().asText();
-                Module m = modules.get(moduleId);
-                if ("empty".equals(moduleId)) {
-                    // slot is not used
-                    sh.getModules().put(e.getKey(), null);
-                } else if (m == null) {
-                    throw new IllegalArgumentException("Can't find module \"" + moduleId + "\"");
+                    });
                 } else {
-                    Slot slot = sh.getSlots().get(slotId);
-                    Optional<ModuleCategory> c = slot.getCategoriesAllowed().stream().filter(mc -> mc.equals(m.getCategory())).findAny();
-                    if (!c.isPresent()) {
-                        throw new IllegalArgumentException("Module \"" + moduleId + "\" with category \"" + m.getCategory() + "\" can't be installed in slot " + slot);
-                    }
-                    sh.getModules().put(e.getKey(), m);
+                    declaredSlots.fields().forEachRemaining(s -> {
+                        Slot slot = new Slot(s.getKey());
+                        if (s.getValue().isTextual()) {
+                            if (s.getValue().asText().equals("inherit")) {
+                                // inherited from parent hull
+                                slot = Slot.INHERITED;
+                            } else {
+                                // a reference to slot from current hull - to be resolved later
+                                refs.put(s.getKey(), s.getValue().asText());
+                            }
+                        } else if (s.getValue().isObject()) {
+                            // overriden
+                            final Slot sl = new Slot(s.getKey());
+                            s.getValue().get("allowed_module_categories").elements().forEachRemaining(e -> {
+                                sl.getCategoriesAllowed().add(ModuleCategory.byName(e.asText()));
+                            });
+                            sl.setRequired(s.getValue().get("required").asBoolean());
+                            slot = sl;
+                        }
+                        slots.put(s.getKey(), slot);
+                    });
+                    // deep copy instead of reference
+                    refs.forEach((k, ref) -> {
+                        slots.get(k).setRequired(slots.get(ref).isRequired());
+                        slots.get(k).getCategoriesAllowed().addAll(slots.get(ref).getCategoriesAllowed());
+                    });
                 }
-            });
+                sh.getSlots().putAll(slots);
+            }
         }
     }
 

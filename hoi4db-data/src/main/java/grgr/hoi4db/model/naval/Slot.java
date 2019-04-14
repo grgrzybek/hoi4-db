@@ -29,6 +29,9 @@ import grgr.hoi4db.model.HasId;
  */
 public class Slot extends HasId {
 
+    // marker slots to indicate further processing is required
+    public static final Slot INHERITED = new Slot("inherited");
+
     private boolean required;
     private List<ModuleCategory> categoriesAllowed = new LinkedList<>();
 
@@ -50,6 +53,9 @@ public class Slot extends HasId {
 
     @Override
     public String toString() {
+        if (this == INHERITED) {
+            return "<inherited>";
+        }
         return String.format("%s%s: %s", getId(), required ? "*" : "",
                 categoriesAllowed.stream().map(ModuleCategory::toString).collect(Collectors.joining(", ")));
     }
