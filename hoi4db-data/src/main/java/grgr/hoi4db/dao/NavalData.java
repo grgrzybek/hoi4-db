@@ -118,9 +118,9 @@ public class NavalData {
                 }
                 // assumes ordered declaration...
                 ShipHull sh = null;
-                if (v.has("parent")) {
+                /*if (v.has("parent")) {
                     sh = byId.get(v.get("parent").asText()).copy(e.getKey());
-                } else if (v.has("archetype")) {
+                } else */if (v.has("archetype")) {
                     sh = byId.get(v.get("archetype").asText()).copy(e.getKey());
                 } else {
                     sh = new ShipHull(e.getKey());
