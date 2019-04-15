@@ -78,11 +78,17 @@ public class NavalData {
         this.hoi4Dir = hoi4Dir;
     }
 
+    /**
+     * List all hull definitions. All countries use these definitions as ships that can be built
+     * (most are not complete), but some countries may add country-specific models.
+     * @return
+     * @throws IOException
+     */
     public List<ShipHull> hulls() throws IOException {
         Set<ShipHull> hulls = new TreeSet<>();
         Map<String, ShipHull> byId = new HashMap<>();
 
-        // take modules - we'll use them for default_modules
+        // get modules - we'll use them for default_modules
         Map<String, Module> modules = new HashMap<>();
         modules().forEach(m -> {
             modules.put(m.getId(), m);
@@ -258,6 +264,11 @@ public class NavalData {
         return new LinkedList<>(hulls);
     }
 
+    /**
+     * List of all ship modules that can be used in specialized ship hull slots
+     * @return
+     * @throws IOException
+     */
     public List<Module> modules() throws IOException {
         Set<Module> modules = new TreeSet<>();
         Map<String, Module> byId = new HashMap<>();
@@ -299,6 +310,11 @@ public class NavalData {
         return new LinkedList<>(modules);
     }
 
+    /**
+     * List of upgrades that are possible to make in ship designs in Vanilla (non-MtG) game.
+     * @return
+     * @throws IOException
+     */
     public List<NavalUpgrade> upgrades() throws IOException {
         Set<NavalUpgrade> upgrades = new TreeSet<>();
 
@@ -471,7 +487,7 @@ public class NavalData {
         }
     }
 
-    public void processShipHullModuleSlots(ShipHull sh, JsonNode v, Map<String, Module> modules) {
+    private void processShipHullModuleSlots(ShipHull sh, JsonNode v, Map<String, Module> modules) {
         if (v.has("module_slots")) {
             // we may have:
             // 1. module_slots = inherit # everything is inherited from parent (or archetype if there's no parent)

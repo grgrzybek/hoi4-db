@@ -218,7 +218,13 @@ public class Hoi4DbParser extends ParserBase {
                             return null;
                         }
                         if (_parsingContext.getParent() != null) {
-                            _reportInvalidEOF("Reached end of file, but not all scopes were closed", _currToken);
+                            if (_parsingContext.getParent().getParent() != null) {
+                                _reportInvalidEOF("Reached end of file, but not all scopes were closed", _currToken);
+                            } else {
+                                // some files have such problem
+                                // reported in https://forum.paradoxplaza.com/forum/index.php?threads/hoi-4-issues-with-game-data-files-when-parsing.1162842/
+                                LOG.warn("Reached end of file, but not all scopes were closed: " + this._ioContext.getSourceReference());
+                            }
                         }
                         _currToken = JsonToken.END_OBJECT;
                         return _currToken;

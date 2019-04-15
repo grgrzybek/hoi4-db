@@ -64,11 +64,10 @@ public class SteamTest {
         for (File dir : dirs) {
             Files.walk(dir.toPath())
                     .filter(p -> p.toFile().isFile() && p.toFile().getName().endsWith(".txt"))
-    //                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("graphicalculturetype.txt"))
-    //                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
-    //                .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
-    //                .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getName().equals("countries"))
-    //                .filter(p -> p.toFile().isFile() && p.toFile().getName().equals("FRA_1939_naval_legacy.txt"))
+                    .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("graphicalculturetype.txt"))
+                    .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("00_ITA_names.txt"))
+                    .filter(p -> p.toFile().isFile() && !p.toFile().getName().equals("BRA_names_divisions.txt"))
+                    .filter(p -> p.toFile().isFile() && !p.toFile().getParentFile().getAbsolutePath().contains("common/countries"))
                     .forEach(p -> {
                         try {
     //                        LOG.info("Parsing {}", p);
