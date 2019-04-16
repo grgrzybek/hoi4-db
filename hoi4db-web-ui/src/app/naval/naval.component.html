@@ -19,3 +19,17 @@
 
 -->
 <p>naval</p>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let m of modules">
+      <td>{{m.category}}</td>
+      <td>{{m.id}}</td>
+    </tr>
+  </tbody>
+</table>

@@ -17,10 +17,19 @@
  * under the License.
  */
 
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
+import { MenuService } from "../layout/context-menu.component";
 
 @Component({
   templateUrl: './land.component.html'
 })
 export class LandComponent {
+
+  constructor(private menu: MenuService) {
+  }
+
+  ngOnInit(): void {
+    this.menu.message("Land submenu");
+  }
+
 }

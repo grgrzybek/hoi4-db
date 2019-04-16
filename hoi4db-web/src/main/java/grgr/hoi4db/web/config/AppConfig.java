@@ -18,10 +18,35 @@
  */
 package grgr.hoi4db.web.config;
 
+import java.io.File;
+import javax.annotation.PostConstruct;
+
+import grgr.hoi4db.dao.NavalData;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({})
 public class AppConfig {
+
+    @Value("${steam.dir}")
+    private String steamDirName;
+
+    private File steamDir;
+
+    @PostConstruct
+    public void init() {
+        steamDir = new File(steamDirName, "Hearts of Iron IV");
+        if (!steamDir.isDirectory()) {
+            throw new IllegalArgumentException("Can't locate Hearts of Iron IV directory");
+        }
+    }
+
+    @Bean
+    public NavalData navalData() {
+        return new NavalData(steamDir);
+    }
+
 }

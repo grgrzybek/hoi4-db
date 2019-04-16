@@ -16,20 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package grgr.hoi4db.web.rest;
 
-import { Component } from '@angular/core';
+import java.io.IOException;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 
-@Component({
-  // A CSS selector that tells Angular to create and insert an instance of this component wherever it finds the
-  // corresponding tag in template HTML.
-  selector: "hoi4db-app",
-  // The module-relative address of this component's HTML template.
-  // This template defines the component's host view.
-  templateUrl: "./app.component.html",
-  styles: [],
-  // An array of providers for services that the component requires
-  providers: []
-})
-export class AppComponent {
-  title = "Hello!"
+import grgr.hoi4db.dao.NavalData;
+import grgr.hoi4db.model.naval.Module;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Path("/")
+@Produces("application/json")
+@Component
+public class NavalApi {
+
+    private final NavalData navalData;
+
+    @Autowired
+    public NavalApi(NavalData navalData) {
+        this.navalData = navalData;
+    }
+
+    @GET
+    @Path("modules")
+    public Module[] modules() throws IOException {
+        return navalData.modules().toArray(new Module[0]);
+    }
+
 }

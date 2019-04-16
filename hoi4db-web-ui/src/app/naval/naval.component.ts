@@ -17,10 +17,32 @@
  * under the License.
  */
 
-import {Component} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NavalModule, NavalService } from "./naval.model";
+import { ContextMenuComponent, MenuService } from "../layout/context-menu.component";
 
 @Component({
   templateUrl: './naval.component.html'
 })
-export class NavalComponent {
+export class NavalComponent implements OnInit, OnDestroy {
+
+  constructor(private naval: NavalService, private menu: MenuService) {
+    console.info(">> constructor()");
+  }
+
+  private modules: NavalModule[];
+
+  ngOnInit(): void {
+    console.info(">> ngOnInit()");
+    this.menu.message("Naval submenu");
+
+    this.naval.modules().subscribe((modules: NavalModule[]) => {
+      this.modules = modules;
+    })
+  }
+
+  ngOnDestroy(): void {
+    console.info(">> ngOnDestroy()");
+  }
+
 }

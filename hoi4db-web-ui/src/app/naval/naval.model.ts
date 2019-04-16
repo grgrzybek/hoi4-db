@@ -17,19 +17,27 @@
  * under the License.
  */
 
-import { Component } from '@angular/core';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
 
-@Component({
-  // A CSS selector that tells Angular to create and insert an instance of this component wherever it finds the
-  // corresponding tag in template HTML.
-  selector: "hoi4db-app",
-  // The module-relative address of this component's HTML template.
-  // This template defines the component's host view.
-  templateUrl: "./app.component.html",
-  styles: [],
-  // An array of providers for services that the component requires
-  providers: []
+export interface NavalModule {
+
+  id: string;
+  category: string;
+
+}
+
+@Injectable({
+  providedIn: "root"
 })
-export class AppComponent {
-  title = "Hello!"
+export class NavalService {
+
+  constructor(private http: HttpClient) {
+  }
+
+  public modules(): Observable<NavalModule[]> {
+    return this.http.get<NavalModule[]>("http://localhost:1936/apis/naval/modules");
+  }
+
 }

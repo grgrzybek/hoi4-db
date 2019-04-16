@@ -18,11 +18,10 @@
  */
 package grgr.hoi4db.web.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
@@ -35,14 +34,10 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
 
 @Configuration
 @ComponentScan("grgr.hoi4db.web.controllers")
+@Import({
+        CxfConfig.class
+})
 public class WebConfig implements WebMvcConfigurer {
-
-    private final Environment environment;
-
-    @Autowired
-    public WebConfig(Environment environment) {
-        this.environment = environment;
-    }
 
     @Bean
     public HandlerMapping handlerMapping() {

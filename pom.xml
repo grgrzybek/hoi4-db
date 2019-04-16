@@ -72,6 +72,7 @@
         <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
         <version.commons-io>2.6</version.commons-io>
         <version.io.undertow>2.0.20.Final</version.io.undertow>
+        <version.org.apache.cxf>3.3.1</version.org.apache.cxf>
         <version.org.assertj>3.11.1</version.org.assertj>
         <version.org.junit.jupiter>5.3.1</version.org.junit.jupiter>
         <version.org.mockito>2.23.0</version.org.mockito>
@@ -126,6 +127,19 @@
                 <version>${version.org.springframework}</version>
             </dependency>
 
+            <!-- CXF -->
+
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-transports-http</artifactId>
+                <version>${version.org.apache.cxf}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+                <version>${version.org.apache.cxf}</version>
+            </dependency>
+
             <!-- Undertow -->
 
             <dependency>
@@ -144,6 +158,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
+                <version>${version.com.fasterxml.jackson}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
                 <version>${version.com.fasterxml.jackson}</version>
             </dependency>
 

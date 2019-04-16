@@ -61,6 +61,14 @@ public class Stat extends HasId {
         return new Stat(id, value, Operation.MULTIPLY);
     }
 
+    public Number getValue() {
+        return value;
+    }
+
+    public Operation getOperation() {
+        return operation;
+    }
+
     private Stat(String id, Number value, Operation operation) {
         super(id);
         this.value = value;

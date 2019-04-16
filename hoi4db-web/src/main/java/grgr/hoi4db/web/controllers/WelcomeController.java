@@ -16,20 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package grgr.hoi4db.web.controllers;
 
-import { Component } from '@angular/core';
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 
-@Component({
-  // A CSS selector that tells Angular to create and insert an instance of this component wherever it finds the
-  // corresponding tag in template HTML.
-  selector: "hoi4db-app",
-  // The module-relative address of this component's HTML template.
-  // This template defines the component's host view.
-  templateUrl: "./app.component.html",
-  styles: [],
-  // An array of providers for services that the component requires
-  providers: []
-})
-export class AppComponent {
-  title = "Hello!"
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class WelcomeController {
+
+    @Value("${title}")
+    private String title;
+    @Value("${version}")
+    private String version;
+
+    @RequestMapping("/")
+    public String welcome() {
+        return "redirect:/version";
+    }
+
+    @RequestMapping("/version")
+    public void version(HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain");
+        response.getWriter().println(String.format("%s: %s", title, version));
+    }
+
 }

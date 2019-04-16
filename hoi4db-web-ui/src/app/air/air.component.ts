@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
+import { MenuService } from "../layout/context-menu.component";
 
 @Component({
   templateUrl: './air.component.html'
 })
 export class AirComponent {
   title = "Air units";
+
+  constructor(private menu: MenuService) {
+  }
+
+  ngOnInit(): void {
+    this.menu.message("Air submenu")
+  }
+
 }

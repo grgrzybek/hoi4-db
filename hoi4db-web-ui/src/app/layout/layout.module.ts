@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { Component } from '@angular/core';
+import { NgModule } from "@angular/core";
+import { ContextMenuComponent, MenuService } from "./context-menu.component";
 
-@Component({
-  // A CSS selector that tells Angular to create and insert an instance of this component wherever it finds the
-  // corresponding tag in template HTML.
-  selector: "hoi4db-app",
-  // The module-relative address of this component's HTML template.
-  // This template defines the component's host view.
-  templateUrl: "./app.component.html",
-  styles: [],
-  // An array of providers for services that the component requires
-  providers: []
+@NgModule({
+  imports: [],
+  exports: [
+    ContextMenuComponent
+  ],
+  declarations: [
+    ContextMenuComponent
+  ],
+  providers: [
+    MenuService
+  ]
 })
-export class AppComponent {
-  title = "Hello!"
+export class LayoutModule {
 }

@@ -17,27 +17,27 @@
  * under the License.
  */
 
-import {NgModule} from "@angular/core";
+import { NgModule } from "@angular/core";
 // When you want to use RouterLink, .forRoot(), and .forChild()
-import {RouterModule, Routes} from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
-import {WelcomeComponent} from "./welcome.component";
-import {LandComponent} from "./land/land.component";
-import {AirComponent} from "./air/air.component";
-import {NavalComponent} from "./naval/naval.component";
+import { WelcomeComponent } from "./welcome.component";
+import { LandComponent } from "./land/land.component";
+import { AirComponent } from "./air/air.component";
+import { NavalComponent } from "./naval/naval.component";
 
 const routes: Routes = [
-  {path: '', redirectTo: '/welcome', pathMatch: 'full'},
-  {path: 'welcome', component: WelcomeComponent},
-  {path: 'land', component: LandComponent},
-  {path: 'air', component: AirComponent},
-  {path: 'naval', component: NavalComponent}
+  { path: '', redirectTo: '/welcome', pathMatch: 'full' },
+  { path: 'welcome', component: WelcomeComponent },
+  { path: 'land', component: LandComponent },
+  { path: 'air', component: AirComponent },
+  { path: 'naval', component: NavalComponent }
 ];
 
 @NgModule({
   // The set of NgModules whose exported declarables are available to templates in this module.
   imports: [
-    RouterModule.forRoot(routes, {enableTracing: true})
+    RouterModule.forRoot(routes, { enableTracing: false })
   ],
   // The set of components, directives, and pipes declared in this NgModule that can be used in the template
   // of any component that is part of an NgModule that imports this NgModule. Exported declarations

@@ -17,19 +17,8 @@
  * under the License.
  */
 
-import { Component } from '@angular/core';
-
-@Component({
-  // A CSS selector that tells Angular to create and insert an instance of this component wherever it finds the
-  // corresponding tag in template HTML.
-  selector: "hoi4db-app",
-  // The module-relative address of this component's HTML template.
-  // This template defines the component's host view.
-  templateUrl: "./app.component.html",
-  styles: [],
-  // An array of providers for services that the component requires
-  providers: []
-})
-export class AppComponent {
-  title = "Hello!"
-}
+body { font-family: monospace }
+table { margin-top: 1em }
+table, td { border-width: 0 }
+td span.field { font-weight: bold }
+td span.value { color: blue }

@@ -28,6 +28,7 @@
     </appender>
 
     <logger name="grgr.hoi4db" level="TRACE" />
+    <logger name="org.apache.cxf" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
