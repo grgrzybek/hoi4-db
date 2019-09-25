@@ -68,10 +68,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Versions -->
-        <version.ch.qos.logback>1.2.3</version.ch.qos.logback>
         <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
         <version.commons-io>2.6</version.commons-io>
         <version.io.undertow>2.0.20.Final</version.io.undertow>
+        <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
         <version.org.apache.cxf>3.3.1</version.org.apache.cxf>
         <version.org.assertj>3.11.1</version.org.assertj>
         <version.org.junit.jupiter>5.3.1</version.org.junit.jupiter>
@@ -213,14 +213,14 @@
                 <version>${version.org.slf4j}</version>
             </dependency>
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${version.ch.qos.logback}</version>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${version.org.apache.logging.log4j}</version>
             </dependency>
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${version.ch.qos.logback}</version>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${version.org.apache.logging.log4j}</version>
             </dependency>
 
         </dependencies>

@@ -51,6 +51,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -71,6 +72,9 @@ public class Main {
     private static Undertow server;
 
     public static void main(String[] args) throws Exception {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+
         ConfigurableEnvironment environment = new StandardServletEnvironment();
 
         ClassPathResource properties = new ClassPathResource("/application.properties");
@@ -180,6 +184,8 @@ public class Main {
             server.stop();
             applicationContext.stop();
             LOG.info("Bye.");
+
+            SLF4JBridgeHandler.uninstall();
         }));
     }
 
