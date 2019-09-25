@@ -28,6 +28,16 @@ To run all tests that require game data files, execute (Linux):
 
 (`Hearts of Iron IV` directory is expected to reside in `${steam.dir}`.)
 
+To start Spring based standalone web application that provides RESTful API, run:
+
+    cd hoi4db-web
+    mvn exec:java -Dsteam.dir=/data/steam/steamapps/common
+
+To start Angular frontend, run:
+
+    cd hoi4db-web-ui
+    npm run start
+
 == Data model
 
 Both streaming parser and dedicated jackson-databind classes support construction of Hearts of Iron IV™ data model which I plan to use for:
