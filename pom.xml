@@ -68,7 +68,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Versions -->
-        <version.com.fasterxml.jackson>2.9.8</version.com.fasterxml.jackson>
+        <version.com.fasterxml.jackson>2.10.0.pr3</version.com.fasterxml.jackson>
         <version.commons-io>2.6</version.commons-io>
         <version.io.undertow>2.0.20.Final</version.io.undertow>
         <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>

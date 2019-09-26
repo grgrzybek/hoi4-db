@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import org.junit.jupiter.api.Test;
@@ -50,8 +51,9 @@ public class JsonTest {
 
     @Test
     public void read() throws IOException {
-        JsonFactory factory = new JsonFactory();
-        factory.disable(USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
+        JsonFactory factory = new JsonFactoryBuilder()
+                .configure(USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING, false)
+                .build();
 
         try (JsonParser parser = factory.createParser(new StringReader("{\"id\": 1, \"name\": \"Grzegorz\", \"address\": {\"street\": \"xyz\", \"v\": 1.2}, \"code\": \"green\"}"))) {
             while (parser.nextToken() != null) {
@@ -63,8 +65,9 @@ public class JsonTest {
 
     @Test
     public void readString() throws IOException {
-        JsonFactory factory = new JsonFactory();
-        factory.disable(USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
+        JsonFactory factory = new JsonFactoryBuilder()
+                .configure(USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING, false)
+                .build();
 
         JsonParser parser = factory.createParser("{\"id\": 1, \"name\": \"Grzegorz\", \"address\": {\"street\": \"xyz\", \"v\": [1.2, \"x\"]}, \"code\": \"green\"}");
         while (parser.nextToken() != null) {
