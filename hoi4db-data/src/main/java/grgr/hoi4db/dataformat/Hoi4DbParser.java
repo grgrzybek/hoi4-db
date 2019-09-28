@@ -650,7 +650,7 @@ public class Hoi4DbParser extends ParserBase {
         return false;
     }
 
-    private boolean in(char c, char ... chars) {
+    private boolean in(char c, char... chars) {
         for (char x : chars) {
             if (c == x) {
                 return true;
@@ -682,8 +682,7 @@ public class Hoi4DbParser extends ParserBase {
         return 0;
     }
 
-    private void updateLocation()
-    {
+    private void updateLocation() {
         int ptr = _inputPtr;
         _tokenInputTotal = _currInputProcessed + ptr;
         _tokenInputRow = _currInputRow;

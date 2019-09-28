@@ -36,7 +36,9 @@ import static grgr.hoi4db.model.Stat.BD_100;
  */
 public class ShipHull extends HasId implements Comparable<ShipHull> {
 
-    private int year;
+    private int year = 1936;
+
+    private ShipCategory category;
 
     private boolean archetype;
     private boolean buildable;
@@ -109,6 +111,14 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public ShipCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(ShipCategory category) {
+        this.category = category;
     }
 
     public boolean isArchetype() {
@@ -341,7 +351,7 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
                 heavyAttack, heavyArmorPiercing,
                 torpedoAttack, subAttack, antiAirAttack,
                 surfaceDetection, surfaceVisibility,
-                subDetection,  subAttack,
+                subDetection, subAttack,
                 armor, hp,
                 navalSpeed, navalRange, reliability.multiply(BD_100),
                 fuelConsumption, buildCost, manpower,
@@ -359,6 +369,7 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
     public ShipHull copy(String newId) {
         ShipHull sh = new ShipHull(newId);
 
+        sh.setCategory(getCategory());
         sh.setYear(getYear());
         sh.setInterfaceCategory(getInterfaceCategory());
         sh.getTypes().addAll(getTypes());

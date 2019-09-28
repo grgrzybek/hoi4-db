@@ -80,7 +80,7 @@ public class Conversion {
     public String toString() {
         return String.format("%s(%.02f%s)",
                 category != null ? "@" + category.toString() : module,
-                cost instanceof BigDecimal ? (BigDecimal)cost : new BigDecimal((BigInteger)cost),
+                cost instanceof BigDecimal ? (BigDecimal) cost : new BigDecimal((BigInteger) cost),
                 resources.size() == 0 ? "" : resources.stream().map(ResourceAmount::toString).collect(Collectors.joining(", ", " {", "}")));
     }
 

@@ -16,49 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package grgr.hoi4db.model;
+package grgr.hoi4db.model.naval;
 
-import java.util.Objects;
+import grgr.hoi4db.model.HasName;
 
 /**
- * Every definition has ID - it's the field name in JSONish game data file.
+ * A task force consists of {@link Ship ships}.
  */
-public class HasId {
+public class TaskForce extends HasName {
 
-    private String id;
-    private String parentId;
+    private Fleet fleet;
 
-    public HasId(String id) {
-        this.id = id;
+    public TaskForce(String name) {
+        super(name);
     }
 
-    public String getId() {
-        return id;
+    public Fleet getFleet() {
+        return fleet;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HasId hasId = (HasId) o;
-        return Objects.equals(id, hasId.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public void setFleet(Fleet fleet) {
+        this.fleet = fleet;
     }
 
 }

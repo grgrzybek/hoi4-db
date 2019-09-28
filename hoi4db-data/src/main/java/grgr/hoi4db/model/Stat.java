@@ -31,6 +31,12 @@ public class Stat extends HasId {
     private Number value;
     private Operation operation;
 
+    private Stat(String id, Number value, Operation operation) {
+        super(id);
+        this.value = value;
+        this.operation = operation;
+    }
+
     /**
      * Constructs a stat that's added to original value
      * @param id
@@ -67,12 +73,6 @@ public class Stat extends HasId {
 
     public Operation getOperation() {
         return operation;
-    }
-
-    private Stat(String id, Number value, Operation operation) {
-        super(id);
-        this.value = value;
-        this.operation = operation;
     }
 
     @Override

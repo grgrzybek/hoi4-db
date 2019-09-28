@@ -21,6 +21,7 @@ package grgr.hoi4db;
 import java.io.File;
 import java.io.IOException;
 
+import grgr.hoi4db.dao.CountryData;
 import grgr.hoi4db.dao.NavalData;
 import grgr.hoi4db.model.naval.Module;
 import grgr.hoi4db.model.naval.ShipHull;
@@ -74,6 +75,20 @@ public class ModelTest {
         for (NavalUpgrade nu : nd.upgrades()) {
             System.out.println(nu);
         }
+    }
+
+    @Test
+    public void readCountryShipVariants() throws IOException {
+        CountryData cd = new CountryData(HOI4_DIR, new NavalData(HOI4_DIR));
+        cd.variants("ENG").forEach(v -> {
+            System.out.println(v.toString());
+        });
+//        cd.allVariants().forEach((c, variants) -> {
+//            System.out.println("--- " + c);
+//            variants.forEach(v -> {
+//                System.out.println(v.toString());
+//            });
+//        });
     }
 
 }

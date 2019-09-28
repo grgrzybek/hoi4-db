@@ -22,11 +22,8 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import grgr.hoi4db.databind.Hoi4DbNodeFactory;
 import grgr.hoi4db.dataformat.Hoi4DbFactory;
 import org.junit.jupiter.api.Test;

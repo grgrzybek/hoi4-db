@@ -117,7 +117,7 @@ public class ExtractTest {
                 if (t != JsonToken.START_OBJECT && t != JsonToken.START_ARRAY) {
                     System.out.printf("\"%s\" = \"%s\" " + "<" + parser.currentName() + ">" + "\n", n, parser.getCurrentValue());
                 } else if (t == JsonToken.START_OBJECT) {
-                    System.out.printf("\"%s\" = { "  + "<" + parser.currentName() + ">" + "\n", n);
+                    System.out.printf("\"%s\" = { " + "<" + parser.currentName() + ">" + "\n", n);
                     ind += 3;
                 } else {
                     System.out.printf("\"%s\" = [ " + "<" + parser.currentName() + ">" + "\n", n);

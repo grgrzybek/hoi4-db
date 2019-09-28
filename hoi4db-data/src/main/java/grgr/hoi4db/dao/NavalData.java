@@ -29,12 +29,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import grgr.hoi4db.databind.Hoi4DbNodeFactory;
-import grgr.hoi4db.dataformat.Hoi4DbFactory;
 import grgr.hoi4db.model.Constraint;
 import grgr.hoi4db.model.Conversion;
 import grgr.hoi4db.model.Resource;
@@ -43,11 +39,14 @@ import grgr.hoi4db.model.Stat;
 import grgr.hoi4db.model.naval.Module;
 import grgr.hoi4db.model.naval.ModuleCategory;
 import grgr.hoi4db.model.naval.ModuleCountLimit;
+import grgr.hoi4db.model.naval.ShipCategory;
 import grgr.hoi4db.model.naval.ShipHull;
 import grgr.hoi4db.model.naval.Slot;
 import grgr.hoi4db.model.upgrades.NavalUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static grgr.hoi4db.dao.Utils.withFileSet;
 
 /**
  * Accesses naval-related data
@@ -84,7 +83,7 @@ public class NavalData {
      * @return
      * @throws IOException
      */
-    public List<ShipHull> hulls() throws IOException {
+    public List<ShipHull> hulls() {
         Set<ShipHull> hulls = new TreeSet<>();
         Map<String, ShipHull> byId = new HashMap<>();
 
@@ -95,7 +94,9 @@ public class NavalData {
         });
 
         // first collect archetypes as template for buildable models
-        withFileSet(HULL_DEFINITIONS, (tree) -> {
+        withFileSet(hoi4Dir, HULL_DEFINITIONS, (file, tree) -> {
+            ShipCategory category = ShipCategory.fromHullFile(file.getName());
+
             tree.get("equipments").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
                 if (!(v.has("is_archetype") && v.get("is_archetype").asBoolean())) {
@@ -104,8 +105,9 @@ public class NavalData {
                 ShipHull sh = new ShipHull(e.getKey());
                 sh.setArchetype(true);
                 sh.setBuildable(false);
+                sh.setCategory(category);
 
-                processShipHull(sh, v, modules);
+                processShipHull(sh, v);
                 processShipHullModuleSlots(sh, v, modules);
 
                 byId.put(sh.getId(), sh);
@@ -116,7 +118,7 @@ public class NavalData {
         // module_slots may be taken from parent models (using "inherit")
         // TODO: seems like "type" comes from parent instead...
         // also ship_hull_cruiser_panzerschiff gets type=screen from archetype, as it has no parent
-        withFileSet(HULL_DEFINITIONS, (tree) -> {
+        withFileSet(hoi4Dir, HULL_DEFINITIONS, (file, tree) -> {
             tree.get("equipments").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
                 if (v.has("is_archetype") && v.get("is_archetype").asBoolean()) {
@@ -126,7 +128,8 @@ public class NavalData {
                 ShipHull sh = null;
                 /*if (v.has("parent")) {
                     sh = byId.get(v.get("parent").asText()).copy(e.getKey());
-                } else */if (v.has("archetype")) {
+                } else */
+                if (v.has("archetype")) {
                     sh = byId.get(v.get("archetype").asText()).copy(e.getKey());
                 } else {
                     sh = new ShipHull(e.getKey());
@@ -135,7 +138,7 @@ public class NavalData {
                 sh.setArchetype(false);
                 sh.setBuildable(true);
 
-                processShipHull(sh, v, modules);
+                processShipHull(sh, v);
                 processShipHullModuleSlots(sh, v, modules);
 
                 byId.put(sh.getId(), sh);
@@ -152,10 +155,13 @@ public class NavalData {
         // reorganize module_slots from archetype and parent hulls
         Map<String, ShipHull> toProcess = new HashMap<>(byId);
 
+        // no need to process hulls where no slot is inherited
         toProcess.entrySet().removeIf(e -> !e.getValue().getSlots().isEmpty()
                 && e.getValue().getSlots().values().stream().noneMatch(s -> s == Slot.INHERITED));
+
         while (!toProcess.isEmpty()) {
             ShipHull sh = toProcess.values().iterator().next();
+            // start from highest, unprocessed parent
             while (sh.getParentId() != null && toProcess.containsKey(sh.getParentId())) {
                 sh = sh.getParent();
             }
@@ -169,7 +175,7 @@ public class NavalData {
             }
             final ShipHull parent = byId.get(parentId);
             if (sh.getSlots().isEmpty()) {
-                // copy from parent
+                // copy from parent, because of module_slots=inherit
                 sh.getSlots().putAll(parent.getSlots());
             } else {
                 // copy only inherited ones
@@ -184,7 +190,7 @@ public class NavalData {
         }
 
         // and process default_modules - even for archetype
-        withFileSet(HULL_DEFINITIONS, (tree) -> {
+        withFileSet(hoi4Dir, HULL_DEFINITIONS, (file, tree) -> {
             tree.get("equipments").fields().forEachRemaining(e1 -> {
                 JsonNode v = e1.getValue();
                 ShipHull sh = byId.get(e1.getKey());
@@ -221,6 +227,7 @@ public class NavalData {
 
         while (!toProcess.isEmpty()) {
             ShipHull sh = toProcess.values().iterator().next();
+            // start from highest, unprocessed parent
             while (sh.getParentId() != null && toProcess.containsKey(sh.getParentId())) {
                 sh = byId.get(sh.getParentId());
             }
@@ -248,6 +255,9 @@ public class NavalData {
                     sh.getModules().clear();
                     sh.getModules().putAll(parent.getModules());
                     sh.getModules().putAll(ours);
+
+                    // but retain only these modules, for which we have slots (see "ship_hull_pre_dreadnought")
+                    sh.getModules().keySet().retainAll(sh.getSlots().keySet());
                 }
                 toProcess.remove(sh.getId());
             }
@@ -269,11 +279,11 @@ public class NavalData {
      * @return
      * @throws IOException
      */
-    public List<Module> modules() throws IOException {
+    public List<Module> modules() {
         Set<Module> modules = new TreeSet<>();
         Map<String, Module> byId = new HashMap<>();
 
-        withFileSet(MODULE_DEFINITIONS, (tree) -> {
+        withFileSet(hoi4Dir, MODULE_DEFINITIONS, (file, tree) -> {
             tree.get("equipment_modules").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
                 Module m = new Module(e.getKey());
@@ -318,7 +328,7 @@ public class NavalData {
     public List<NavalUpgrade> upgrades() throws IOException {
         Set<NavalUpgrade> upgrades = new TreeSet<>();
 
-        withFileSet(UPGRADES, (tree) -> {
+        withFileSet(hoi4Dir, UPGRADES, (file, tree) -> {
             tree.get("upgrades").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
                 NavalUpgrade upgrade = new NavalUpgrade(e.getKey());
@@ -377,7 +387,12 @@ public class NavalData {
         return new LinkedList<>(upgrades);
     }
 
-    private void processShipHull(ShipHull sh, JsonNode v, Map<String, Module> modules) {
+    /**
+     * Process all basic stats and Vanilla upgrades, but not modules/slots
+     * @param sh
+     * @param v
+     */
+    private void processShipHull(ShipHull sh, JsonNode v) {
         if (v.has("parent")) {
             sh.setParentId(v.get("parent").asText());
         }
@@ -487,11 +502,19 @@ public class NavalData {
         }
     }
 
+    /**
+     * Process {@code modules_slots} of a hull
+     * @param sh
+     * @param v
+     * @param modules
+     */
     private void processShipHullModuleSlots(ShipHull sh, JsonNode v, Map<String, Module> modules) {
         if (v.has("module_slots")) {
             // we may have:
             // 1. module_slots = inherit # everything is inherited from parent (or archetype if there's no parent)
-            // 2. module_slots = { x1 = yy x2 = inherit ... } # selected slot is inherited
+            // 2. module_slots = { x1 = yy x2 = inherit ... } # selected slot is inherited, but the ones not present
+            //                                                # are not inherited from parent modules_slots
+            //                                                # see "ship_hull_pre_dreadnought" for example
             // 3. module_slots = { x1 = yy x2 = x1 ... } # copy of slot from the same module_slots
 
             Map<String, Slot> slots = new LinkedHashMap<>();
@@ -614,17 +637,6 @@ public class NavalData {
             value.fields().forEachRemaining(e -> {
                 m.getDismantleCostResources().add(new ResourceAmount(Resource.byName(e.getKey()), e.getValue().bigIntegerValue()));
             });
-        }
-    }
-
-    private void withFileSet(String[] filenames, Consumer<JsonNode> processor) throws IOException {
-        ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
-        mapper.setNodeFactory(new Hoi4DbNodeFactory());
-
-        for (String fileName : filenames) {
-            File file = new File(hoi4Dir, fileName);
-            JsonNode tree = mapper.readTree(file);
-            processor.accept(tree);
         }
     }
 

@@ -21,44 +21,35 @@ package grgr.hoi4db.model;
 import java.util.Objects;
 
 /**
- * Every definition has ID - it's the field name in JSONish game data file.
+ * Many objects have name.
  */
-public class HasId {
+public class HasName {
 
-    private String id;
-    private String parentId;
+    private String name;
 
-    public HasId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
+    public HasName(String name) {
+        this.name = name;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HasId hasId = (HasId) o;
-        return Objects.equals(id, hasId.id);
+        HasName hasName = (HasName) o;
+        return Objects.equals(name, hasName.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

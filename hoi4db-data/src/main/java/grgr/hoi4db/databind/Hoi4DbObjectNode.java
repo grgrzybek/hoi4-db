@@ -25,6 +25,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/**
+ * Special {@link ObjectNode} that doesn't break on duplicate fields and converts them to arrays instead.
+ */
 public class Hoi4DbObjectNode extends ObjectNode {
 
     public Hoi4DbObjectNode(JsonNodeFactory nc) {
