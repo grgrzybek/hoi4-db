@@ -33,11 +33,14 @@ import static grgr.hoi4db.model.Stat.BD_100;
 
 /**
  * Represents an entry from {@code /equipments/*} nodes in {@code common/units/equipment/(ship_hull_|)*.txt}.
+ * If it contains all mandatory modules, it can be built, but usually it's referenced as {@code type} in
+ * {@link ShipHullVariant} that's specific to given country.
  */
 public class ShipHull extends HasId implements Comparable<ShipHull> {
 
     private int year = 1936;
 
+    private ShipHullCategory hullCategory;
     private ShipCategory category;
 
     private boolean archetype;
@@ -56,7 +59,9 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
 //    private String visual_level;
 //    private String alias;
 
+    // screen, capital, submarine, ...
     private List<String> types = new LinkedList<>();
+
     private List<String> upgrades = new LinkedList<>();
 
     private BigDecimal lightArmorPiercing;
@@ -88,6 +93,7 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
 
     private List<ModuleCountLimit> moduleLimits = new LinkedList<>();
 
+    // what slots does a hull provide - to be filled with mandatory and optional modules
     private Map<String, Slot> slots = new LinkedHashMap<>();
 
     // mapping from slot Id to actual module used in given slot
@@ -111,6 +117,14 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public ShipHullCategory getHullCategory() {
+        return hullCategory;
+    }
+
+    public void setHullCategory(ShipHullCategory hullCategory) {
+        this.hullCategory = hullCategory;
     }
 
     public ShipCategory getCategory() {
@@ -338,9 +352,10 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
 //                resources.stream().map(ResourceAmount::toString).collect(Collectors.joining(", ")),
 //                dismantleCostResources.stream().map(ResourceAmount::toString).collect(Collectors.joining(", "))
 //        );
-        return String.format("[%s]/%s [%s%s] (parent=%s, year=%d, l=%.02f/%.02f, h=%.02f/%.02f, t=%.02f, s=%.02f, a=%.02f, " +
+        return String.format("[%s (%s)]/%s [%s%s] (parent=%s, year=%d, l=%.02f/%.02f, h=%.02f/%.02f, t=%.02f, s=%.02f, a=%.02f, " +
                         "surf=%.02f/%.02f, sub=%.02f/%.02f, armor=%.02f, hp=%.02f, naval=%.02f/%.02f, r=%+.02f%%, " +
                         "fuel=%.02f, cost=%.02f, mp=%d, %s%s%s)",
+                category,
                 String.join(", ", types),
                 getId(),
                 archetype ? "A" : ".",
@@ -372,7 +387,8 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
         sh.setCategory(getCategory());
         sh.setYear(getYear());
         sh.setInterfaceCategory(getInterfaceCategory());
-        sh.getTypes().addAll(getTypes());
+        // don't copy types - they'll be taken from parent
+        //        sh.getTypes().addAll(getTypes());
         sh.getUpgrades().addAll(getUpgrades());
 
         sh.setLightArmorPiercing(getLightArmorPiercing());
@@ -403,7 +419,7 @@ public class ShipHull extends HasId implements Comparable<ShipHull> {
         sh.getResources().addAll(getResources());
         sh.getModuleLimits().addAll(getModuleLimits());
 
-        // don't copy slots
+        // don't copy slots - they'll be taken from parent
 //        sh.getSlots().putAll(getSlots());
 
         sh.getModules().putAll(getModules());

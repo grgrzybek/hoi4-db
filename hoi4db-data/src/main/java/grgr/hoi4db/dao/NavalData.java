@@ -41,11 +41,13 @@ import grgr.hoi4db.model.naval.ModuleCategory;
 import grgr.hoi4db.model.naval.ModuleCountLimit;
 import grgr.hoi4db.model.naval.ShipCategory;
 import grgr.hoi4db.model.naval.ShipHull;
+import grgr.hoi4db.model.naval.ShipHullCategory;
 import grgr.hoi4db.model.naval.Slot;
 import grgr.hoi4db.model.upgrades.NavalUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static grgr.hoi4db.dao.Utils.asList;
 import static grgr.hoi4db.dao.Utils.withFileSet;
 
 /**
@@ -95,7 +97,7 @@ public class NavalData {
 
         // first collect archetypes as template for buildable models
         withFileSet(hoi4Dir, HULL_DEFINITIONS, (file, tree) -> {
-            ShipCategory category = ShipCategory.fromHullFile(file.getName());
+            ShipHullCategory hullCategory = ShipHullCategory.fromHullFile(file.getName());
 
             tree.get("equipments").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
@@ -105,7 +107,8 @@ public class NavalData {
                 ShipHull sh = new ShipHull(e.getKey());
                 sh.setArchetype(true);
                 sh.setBuildable(false);
-                sh.setCategory(category);
+
+                sh.setHullCategory(hullCategory);
 
                 processShipHull(sh, v);
                 processShipHullModuleSlots(sh, v, modules);
@@ -119,6 +122,8 @@ public class NavalData {
         // TODO: seems like "type" comes from parent instead...
         // also ship_hull_cruiser_panzerschiff gets type=screen from archetype, as it has no parent
         withFileSet(hoi4Dir, HULL_DEFINITIONS, (file, tree) -> {
+            ShipHullCategory hullCategory = ShipHullCategory.fromHullFile(file.getName());
+
             tree.get("equipments").fields().forEachRemaining(e -> {
                 JsonNode v = e.getValue();
                 if (v.has("is_archetype") && v.get("is_archetype").asBoolean()) {
@@ -137,6 +142,8 @@ public class NavalData {
 
                 sh.setArchetype(false);
                 sh.setBuildable(true);
+
+                sh.setHullCategory(hullCategory);
 
                 processShipHull(sh, v);
                 processShipHullModuleSlots(sh, v, modules);
@@ -259,6 +266,11 @@ public class NavalData {
                     // but retain only these modules, for which we have slots (see "ship_hull_pre_dreadnought")
                     sh.getModules().keySet().retainAll(sh.getSlots().keySet());
                 }
+
+                // finally copy the type too
+                if (sh.getTypes().isEmpty()) {
+                    sh.getTypes().addAll(parent.getTypes());
+                }
                 toProcess.remove(sh.getId());
             }
         }
@@ -269,6 +281,64 @@ public class NavalData {
                 sh.getModules().putIfAbsent(s.getId(), Module.EMPTY);
             });
         });
+
+//        // handle remaining template/archetype/parent/inherit data
+//        hulls.stream().filter(sh -> sh.getTypes().isEmpty()).forEach(sh -> {
+//            ShipHull parent = null;
+//            while ((parent = byId.get(sh.getParentId())) != null) {
+//                if (!parent.getTypes().isEmpty()) {
+//                    sh.getTypes().addAll(parent.getTypes());
+//                    break;
+//                }
+//                parent = byId.get(parent.getParentId());
+//            }
+//        });
+
+        // for "ship_hull_cruiser.txt" there's only one archetype: "ship_hull_cruiser"
+        // according to https://hoi4.paradoxwikis.com/Equipment_modding:
+        // - "archetype": Archetype equipment is used to assign more general attributes that regular equipment then
+        //   inherits via the archetype attribute.
+        // - "parent": Which equipment is parent to this equipment (i.e. which does it supercede)
+        //
+        // all but "ship_hull_cruiser" have "archetype = ship_hull_cruiser"
+        // there are 3 parent-child relationships:
+        // - light_cruiser_4 -> light_cruiser_3 -> light_cruiser_2 -> light_cruiser_1 (Vanilla)
+        // - heavy_cruiser_4 -> heavy_cruiser_3 -> heavy_cruiser_2 -> heavy_cruiser_1 (Vanilla)
+        // - ship_hull_cruiser_4 -> ship_hull_cruiser_3 -> ship_hull_cruiser_2 -> ship_hull_cruiser_1 (MtG)
+        // these ships are parentless:
+        // - torpedo_cruiser (Vanilla)
+        // - ship_hull_cruiser_coastal_defense_ship (MtG)
+        // - ship_hull_cruiser_panzerschiff (MtG)
+        // - ship_hull_torpedo_cruiser (MtG)
+
+        // what distinguishes the DLCs is:
+        // - ids prefixed with "ship_hull_" are from MtG (because they're refenced from
+        //   create_equipment_variant objects in blocks with limit = { has_dlc = "Man the Guns" }
+        // - remaining ids are from Vanilla
+        //
+        // now, what distinguishes light cruisers from heavy cruisers is:
+        // - for Vanilla models:
+        //   - light: it's "screen_ship" among types. light_cruiser_* all have [screen_ship, anti_air]
+        //   - heavy: it's "capital_ship" type, but only for heavy_cruiser_1, so I assume type is inherited from parent
+        // - for MtG models:
+        //   - ship_hull_cruiser archetype has "screen_ship" type, so all ship_hull_* (including
+        //     e.g., ship_hull_cruiser_panzerschiff) are assumed to be light - subject to specialization as
+        //     ship hull variant in create_equipment_variant
+        //
+        // later, when reading create_equipment_variant, presence of medium battery in one of the slots
+        // "changes" a cruiser hull into heavy cruiser (CA) - both for Vanilla and MtG. For Vanilla, medium batteries
+        // are already present in heavy_cruiser_* in common/units/equipment/ship_hull_cruiser.txt
+        // so that's how we'll distinguish them.
+        // - CL: has ship_light_medium_battery_* as one of modules (of ship_medium_battery category)
+        // - CA: has ship_medium_battery_* as one of modules (of ship_medium_battery category)
+        //
+        // for heavy hulls, we have battlecruisers (BC), battleships (BB) and super heavy battleships (SHBB)
+        // all have type=capital_ship, so again, modules distinguish the ships based on heavy hull:
+        // - BC: has ship_armor_bc_* as one of modules (of ship_heavy_armor category)
+        // - BB: has ship_armor_bb_* as one of modules (of ship_heavy_armor category)
+        // - SHBB: has ship_armor_shbb as one of modules (of ship_super_heavy_armor category)
+
+        hulls.forEach(ShipCategory::determineCategory);
 
         // this list won't contain archetypes
         return new LinkedList<>(hulls);
@@ -402,15 +472,12 @@ public class NavalData {
         if (v.has("year")) {
             sh.setYear(v.get("year").asInt());
         }
+        // types seem to be then taken from parent
         if (v.has("type")) {
             sh.getTypes().clear();
-            if (v.get("type").isArray()) {
-                v.get("type").elements().forEachRemaining(t -> {
-                    sh.getTypes().add(t.asText());
-                });
-            } else {
-                sh.getTypes().add(v.get("type").asText());
-            }
+            asList(v.get("type")).forEach(t -> {
+                sh.getTypes().add(t.asText());
+            });
         }
         if (v.has("upgrades")) {
             sh.getUpgrades().clear();
@@ -421,6 +488,7 @@ public class NavalData {
         if (v.has("interface_category")) {
             sh.setInterfaceCategory(v.get("interface_category").asText());
         }
+
         if (v.has("lg_attack")) {
             sh.setLightAttack(v.get("lg_attack").decimalValue());
         }
@@ -442,9 +510,14 @@ public class NavalData {
         if (v.has("anti_air_attack")) {
             sh.setAntiAirAttack(v.get("anti_air_attack").decimalValue());
         }
+
         if (v.has("armor_value")) {
             sh.setArmor(v.get("armor_value").decimalValue());
         }
+        if (v.has("max_strength")) {
+            sh.setHp(v.get("max_strength").decimalValue());
+        }
+
         if (v.has("surface_detection")) {
             sh.setSurfaceDetection(v.get("surface_detection").decimalValue());
         }
@@ -454,6 +527,7 @@ public class NavalData {
         if (v.has("surface_visibility")) {
             sh.setSurfaceVisibility(v.get("surface_visibility").decimalValue());
         }
+
         if (v.has("naval_speed")) {
             sh.setNavalSpeed(v.get("naval_speed").decimalValue());
         }
@@ -463,42 +537,35 @@ public class NavalData {
         if (v.has("reliability")) {
             sh.setReliability(v.get("reliability").decimalValue());
         }
-        if (v.has("max_strength")) {
-            sh.setHp(v.get("max_strength").decimalValue());
-        }
+
         if (v.has("fuel_consumption")) {
             sh.setFuelConsumption(v.get("fuel_consumption").decimalValue());
         }
+
         if (v.has("build_cost_ic")) {
             sh.setBuildCost(v.get("build_cost_ic").decimalValue());
         }
+
         if (v.has("manpower")) {
             sh.setManpower(v.get("manpower").bigIntegerValue());
         }
-        JsonNode value = v.get("resources");
-        if (value != null) {
+
+        if (v.has("resources")) {
             sh.getResources().clear();
-            value.fields().forEachRemaining(e -> {
+            v.get("resources").fields().forEachRemaining(e -> {
                 sh.getResources().add(new ResourceAmount(Resource.byName(e.getKey()), e.getValue().bigIntegerValue()));
             });
         }
+
         if (v.has("module_count_limit")) {
-            JsonNode limits = v.get("module_count_limit");
-            if (limits.isArray()) {
-                limits.elements().forEachRemaining(limit -> {
-                    ModuleCountLimit mcl = new ModuleCountLimit();
-                    Constraint c = new Constraint("count", limit.get("count").asText());
-                    mcl.setLimit(c);
-                    mcl.setModuleCategory(ModuleCategory.byName(limit.get("category").asText()));
-                    sh.getModuleLimits().add(mcl);
-                });
-            } else if (limits.isObject()) {
+            sh.getModuleLimits().clear();
+            asList(v.get("module_count_limit")).forEach(limit -> {
                 ModuleCountLimit mcl = new ModuleCountLimit();
-                Constraint c = new Constraint("count", limits.get("count").asText());
+                Constraint c = new Constraint("count", limit.get("count").asText());
                 mcl.setLimit(c);
-                mcl.setModuleCategory(ModuleCategory.byName(limits.get("category").asText()));
+                mcl.setModuleCategory(ModuleCategory.byName(limit.get("category").asText()));
                 sh.getModuleLimits().add(mcl);
-            }
+            });
         }
     }
 

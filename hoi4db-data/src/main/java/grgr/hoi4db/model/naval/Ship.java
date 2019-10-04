@@ -18,17 +18,50 @@
  */
 package grgr.hoi4db.model.naval;
 
+import java.util.Map;
+
 import grgr.hoi4db.model.HasName;
 
 /**
- * Ship is named instance of some {@link ShipHull} in given version.
+ * Ship is named instance of some {@link ShipHull} or {@link ShipHullVariant}.
  */
-public class Ship extends HasName {
+public class Ship extends HasName implements Comparable<Ship> {
 
     private TaskForce taskForce;
 
     public Ship(String name) {
         super(name);
+    }
+
+    /**
+     * Creates named {@link Ship} using country-specific {@link ShipHullVariant}
+     * @param name
+     * @param variant
+     * @return
+     */
+    public static Ship fromShipHullVariant(String name, ShipHullVariant variant) {
+        return fromShipHullAndModules(name, variant.getType(), variant.getModules());
+    }
+
+    /**
+     * Creates named {@link Ship} using generic {@link ShipHull hull design}
+     * @param name
+     * @param hull
+     * @return
+     */
+    public static Ship fromShipHull(String name, ShipHull hull) {
+        return fromShipHullAndModules(name, hull, hull.getModules());
+    }
+
+    private static Ship fromShipHullAndModules(String name, ShipHull hull, Map<String, Module> modules) {
+        Ship s = new Ship(name);
+
+        return s;
+    }
+
+    @Override
+    public int compareTo(Ship o) {
+        return 0;
     }
 
 }

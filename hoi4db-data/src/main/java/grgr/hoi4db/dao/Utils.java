@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import grgr.hoi4db.databind.Hoi4DbNodeFactory;
 import grgr.hoi4db.dataformat.Hoi4DbFactory;
 
@@ -68,19 +67,14 @@ public class Utils {
      * @param n
      * @return
      */
-    public static List<ObjectNode> asArray(JsonNode n) {
-        List<ObjectNode> values = new LinkedList<>();
+    public static List<JsonNode> asList(JsonNode n) {
+        List<JsonNode> values = new LinkedList<>();
         if (n == null) {
             return values;
-        } else if (n.getNodeType() == JsonNodeType.OBJECT) {
-            values.add((ObjectNode) n);
         } else if (n.getNodeType() == JsonNodeType.ARRAY) {
-            n.elements().forEachRemaining(n2 -> {
-                // special case (history/countries/MAN - Manchukou.txt)
-                if (n2.getNodeType() == JsonNodeType.OBJECT) {
-                    values.add((ObjectNode) n2);
-                }
-            });
+            n.elements().forEachRemaining(values::add);
+        } else {
+            values.add(n);
         }
         return values;
     }
@@ -94,7 +88,7 @@ public class Utils {
      * @param n
      * @return
      */
-    public static boolean isMtG(ObjectNode n) {
+    public static boolean isMtG(JsonNode n) {
         return n.has("limit")
                 && n.get("limit").has("has_dlc")
                 && "Man the Guns".equals(n.get("limit").get("has_dlc").asText());

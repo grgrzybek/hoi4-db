@@ -18,24 +18,112 @@
  */
 package grgr.hoi4db.model.naval;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
+import grgr.hoi4db.model.DLC;
 import grgr.hoi4db.model.HasName;
+import grgr.hoi4db.model.Vanguard;
 
 /**
  * A fleet consists of {@link TaskForce task forces}.
  */
-public class Fleet extends HasName {
+public class Fleet extends HasName implements Comparable<Fleet> {
 
-    private List<TaskForce> taskForces = new LinkedList<>();
+    private DLC dlc;
+    private int year = 1936;
+
+    private String country;
+
+    private Vanguard vanguard;
+
+    private Set<TaskForce> taskForces = new TreeSet<>();
 
     public Fleet(String name) {
         super(name);
     }
 
-    public List<TaskForce> getTaskForces() {
+    public DLC getDlc() {
+        return dlc;
+    }
+
+    public void setDlc(DLC dlc) {
+        this.dlc = dlc;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public Vanguard getVanguard() {
+        return vanguard;
+    }
+
+    public void setVanguard(Vanguard vanguard) {
+        this.vanguard = vanguard;
+    }
+
+    public Set<TaskForce> getTaskForces() {
         return taskForces;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Fleet fleet = (Fleet) o;
+        return year == fleet.year &&
+                dlc == fleet.dlc &&
+                country.equals(fleet.country);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), dlc, year, country);
+    }
+
+    @Override
+    public int compareTo(Fleet o) {
+        if (dlc != o.dlc) {
+            return dlc == DLC.MTG ? -1 : 1;
+        }
+        if (year != o.year) {
+            return year - o.year;
+        }
+        if (!country.equals(o.country)) {
+            return country.compareTo(o.country);
+        }
+
+        if (vanguard != o.vanguard) {
+            if (vanguard == null) {
+                return -1;
+            }
+            if (o.vanguard == null) {
+                return 1;
+            }
+            return vanguard.ordinal() - o.vanguard.ordinal();
+        }
+
+        return getName().compareTo(o.getName());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s, %d: %s (task forces: %d)%s", dlc, year, getName(), taskForces.size(), vanguard != null ? " [" + vanguard + "]" : "");
     }
 
 }

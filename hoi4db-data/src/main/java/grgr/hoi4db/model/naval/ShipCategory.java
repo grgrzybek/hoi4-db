@@ -18,42 +18,105 @@
  */
 package grgr.hoi4db.model.naval;
 
+import static grgr.hoi4db.model.naval.ShipHullCategory.CARRIER_HULL;
+import static grgr.hoi4db.model.naval.ShipHullCategory.CRUISER_HULL;
+import static grgr.hoi4db.model.naval.ShipHullCategory.HEAVY_HULL;
+import static grgr.hoi4db.model.naval.ShipHullCategory.LIGHT_HULL;
+import static grgr.hoi4db.model.naval.ShipHullCategory.SUB_HULL;
+
 /**
- * Enum to sort ship/hull types
+ * Enum to sort ship types. These are specializations of {@link ShipHullCategory ship hull types}, to distinguish
+ * light (CL) and heavy (CA) cruisers or battlecruisers (BC), battleships (BB) and super heavy battleships (SHBB).
  */
 public enum ShipCategory {
 
-    LIGHT_SHIP(1),
-    CRUISER_SHIP(2),
-    HEAVY_SHIP(3),
-    CARRIER_SHIP(4),
-    SUB_SHIP(5);
+    DESTROYER(1, LIGHT_HULL, "DD"),
+    LIGHT_CRUISER(2, CRUISER_HULL, "CL"),
+    HEAVY_CRUISER(3, CRUISER_HULL, "CA"),
+    BATTLECRUISER(4, HEAVY_HULL, "BC"),
+    BATTLESHIP(5, HEAVY_HULL, "BB"),
+    SUPER_HEAVY_BATTLESHIP(6, HEAVY_HULL, "SHBB"),
+    CARRIER(7, CARRIER_HULL, "CV"),
+    SUBMARINE(8, SUB_HULL, "SS");
 
     private final int order;
+    private final ShipHullCategory hullCategory;
+    private final String symbol;
 
-    ShipCategory(int order) {
+    ShipCategory(int order, ShipHullCategory hullCategory, String symbol) {
         this.order = order;
+        this.hullCategory = hullCategory;
+        this.symbol = symbol;
     }
 
-    public static ShipCategory fromHullFile(String name) {
-        switch (name) {
-            case "ship_hull_light.txt":
-                return ShipCategory.LIGHT_SHIP;
-            case "ship_hull_cruiser.txt":
-                return ShipCategory.CRUISER_SHIP;
-            case "ship_hull_heavy.txt":
-                return ShipCategory.HEAVY_SHIP;
-            case "ship_hull_carrier.txt":
-                return ShipCategory.CARRIER_SHIP;
-            case "ship_hull_submarine.txt":
-                return ShipCategory.SUB_SHIP;
-            default:
-                return null;
+    /**
+     * Checks what kind of ship we have and set the category inside passed {@link ShipHull}
+     * @param hull
+     */
+    public static void determineCategory(ShipHull hull) {
+        switch (hull.getHullCategory()) {
+            case LIGHT_HULL:
+                hull.setCategory(DESTROYER);
+                break;
+            case CRUISER_HULL: {
+                // we have to look at modules
+                for (Module m : hull.getModules().values()) {
+                    if (m.getCategory() == ModuleCategory.SHIP_MEDIUM_BATTERY) {
+                        if (m.getId().startsWith("ship_light_medium_battery_")) {
+                            hull.setCategory(LIGHT_CRUISER);
+                            return;
+                        } else if (m.getId().startsWith("ship_medium_battery_")) {
+                            hull.setCategory(HEAVY_CRUISER);
+                            return;
+                        }
+                        return;
+                    }
+                }
+                // no baterries included, so assume a not buildable light cruiser, which (when filled with proper
+                // mandatory batteries) may be turned into buildable light or heavy cruiser
+                hull.setCategory(LIGHT_CRUISER);
+                break;
+            }
+            case HEAVY_HULL: {
+                // we have to look at modules
+                for (Module m : hull.getModules().values()) {
+                    if (m.getCategory() == ModuleCategory.SHIP_SUPER_HEAVY_ARMOR) {
+                        hull.setCategory(SUPER_HEAVY_BATTLESHIP);
+                        return;
+                    }
+                    if (m.getCategory() == ModuleCategory.SHIP_HEAVY_ARMOR) {
+                        if (m.getId().startsWith("ship_armor_bc_")) {
+                            hull.setCategory(BATTLECRUISER);
+                            return;
+                        } else if (m.getId().startsWith("ship_armor_bb_")) {
+                            hull.setCategory(BATTLESHIP);
+                            return;
+                        }
+                    }
+                }
+                // no armor, so assume not buildable battleship
+                hull.setCategory(BATTLESHIP);
+                break;
+            }
+            case CARRIER_HULL:
+                hull.setCategory(CARRIER);
+                break;
+            case SUB_HULL:
+                hull.setCategory(SUBMARINE);
+                break;
         }
     }
 
     public int getOrder() {
         return order;
+    }
+
+    public ShipHullCategory getHullCategory() {
+        return hullCategory;
+    }
+
+    public String getSymbol() {
+        return symbol;
     }
 
 }

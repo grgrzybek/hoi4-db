@@ -18,12 +18,19 @@
  */
 package grgr.hoi4db;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import grgr.hoi4db.databind.Hoi4DbNodeFactory;
 import grgr.hoi4db.dataformat.Hoi4DbFactory;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Test;
 
 public class ExtractTest {
@@ -90,6 +97,23 @@ public class ExtractTest {
         JsonParser parser = factory.createParser(getClass().getResourceAsStream("/samples/duplicates.txt"));
         prettyPrint(parser);
         parser.close();
+    }
+
+    @Test
+    @Ignore
+    public void hoiToJson() throws Exception {
+        ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
+        mapper.setNodeFactory(new Hoi4DbNodeFactory());
+
+        File[] files = new File("/data/tmp/cruisers").listFiles((dir, name) -> {
+            return name.endsWith(".txt");
+        });
+        for (File file : files == null ? new File[0] : files) {
+            JsonNode tree = mapper.readTree(file);
+            try (FileWriter fw = new FileWriter(file.getAbsolutePath() + ".json")) {
+                fw.write(tree.toPrettyString());
+            }
+        }
     }
 
     /**

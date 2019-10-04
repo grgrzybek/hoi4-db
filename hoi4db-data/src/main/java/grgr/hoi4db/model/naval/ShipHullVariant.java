@@ -20,14 +20,17 @@ package grgr.hoi4db.model.naval;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import grgr.hoi4db.model.DLC;
 import grgr.hoi4db.model.HasName;
 import grgr.hoi4db.model.upgrades.NavalUpgrade;
 
 /**
- * A particular variant/design of a {@link ShipHull} defined in {@code create_equipment_variant} objects in
- * files like {@code /history/countries/ENG - Britain.txt}.
+ * <p>A particular variant/design of a {@link ShipHull} defined in {@code create_equipment_variant} objects in
+ * files like {@code /history/countries/ENG - Britain.txt}. It's generally a {@link ShipHull} with specific set
+ * of {@link Module modules}.</p>
+ * <p>After checking, the unique key is {@code country:dlc:year:type:name}</p>
  */
 public class ShipHullVariant extends HasName implements Comparable<ShipHullVariant> {
 
@@ -112,13 +115,34 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ShipHullVariant that = (ShipHullVariant) o;
+        return year == that.year &&
+                dlc == that.dlc &&
+                country.equals(that.country) &&
+                type.getId().equals(that.type.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), dlc, year, country, type, type.getId());
+    }
+
+    @Override
     public int compareTo(ShipHullVariant o) {
+        if (!country.equals(o.country)) {
+            return country.compareTo(o.country);
+        }
         if (dlc != o.dlc) {
             return dlc == DLC.MTG ? -1 : 1;
         }
         if (year != o.year) {
             return year - o.year;
         }
+        // category is equivalent of type.getId()
         if (category != o.category) {
             return category.ordinal() - o.category.ordinal();
         }

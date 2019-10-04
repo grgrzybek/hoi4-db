@@ -16,40 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package grgr.hoi4db.model.naval;
-
-import java.util.Set;
-import java.util.TreeSet;
-
-import grgr.hoi4db.model.HasName;
+package grgr.hoi4db.model;
 
 /**
- * A task force consists of {@link Ship ships}.
+ * Special switch for English "ENG_vanguard" focus, where new {@link grgr.hoi4db.model.naval.Fleet}
+ * is created with single {@link grgr.hoi4db.model.naval.TaskForce} and single battleship named differently
+ * depending on {@code ENG_vanguard_communist.txt} or {@code ENG_vanguard_hms.txt} definition file.
  */
-public class TaskForce extends HasName implements Comparable<TaskForce> {
-
-    private Fleet fleet;
-    private Set<Ship> ships = new TreeSet<>();
-
-    public TaskForce(String name) {
-        super(name);
-    }
-
-    public Fleet getFleet() {
-        return fleet;
-    }
-
-    public void setFleet(Fleet fleet) {
-        this.fleet = fleet;
-    }
-
-    public Set<Ship> getShips() {
-        return ships;
-    }
-
-    @Override
-    public int compareTo(TaskForce o) {
-        return 0;
-    }
-
+public enum Vanguard {
+    HMS, COMMUNIST
 }
