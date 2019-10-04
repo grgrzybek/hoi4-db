@@ -19,6 +19,7 @@
 package grgr.hoi4db.dao;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import grgr.hoi4db.model.DLC;
 import grgr.hoi4db.model.Vanguard;
 import grgr.hoi4db.model.naval.Fleet;
 import grgr.hoi4db.model.naval.Module;
+import grgr.hoi4db.model.naval.ShipCategory;
 import grgr.hoi4db.model.naval.ShipHull;
 import grgr.hoi4db.model.naval.ShipHullVariant;
 import grgr.hoi4db.model.naval.TaskForce;
@@ -97,11 +99,11 @@ public class CountryData {
     }
 
     public Map<String, Set<Fleet>> allFleets() {
-        return null;
+        return fleets;
     }
 
     public Set<Fleet> fleets(String country) {
-        return fleets.get(country);
+        return fleets.getOrDefault(country, Collections.emptySet());
     }
 
     /**
@@ -201,9 +203,6 @@ public class CountryData {
                     dlc = DLC.MTG;
                 }
 
-                if (!"ENG".equals(ccode)) {
-                    return false;
-                }
                 Set<Fleet> countryFleets = fleets.computeIfAbsent(ccode, c -> new TreeSet<>());
 
                 final int fyear = year;
@@ -344,6 +343,9 @@ public class CountryData {
                     variant.getModules().put(slotId, shipModules.get(moduleId));
                 }
             });
+
+            // adjust ship category after setting variant-specific modules
+            variant.setCategory(ShipCategory.determineCategory(hull, variant.getModules()));
         } else {
             // process upgrades in Vanilla
         }

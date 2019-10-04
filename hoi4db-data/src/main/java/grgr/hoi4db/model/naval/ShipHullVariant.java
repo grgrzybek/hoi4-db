@@ -144,7 +144,7 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
         }
         // category is equivalent of type.getId()
         if (category != o.category) {
-            return category.ordinal() - o.category.ordinal();
+            return category.getOrder() - o.category.getOrder();
         }
 
         return getName().compareTo(o.getName());

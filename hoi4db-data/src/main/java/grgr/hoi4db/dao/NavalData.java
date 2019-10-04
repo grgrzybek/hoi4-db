@@ -338,7 +338,9 @@ public class NavalData {
         // - BB: has ship_armor_bb_* as one of modules (of ship_heavy_armor category)
         // - SHBB: has ship_armor_shbb as one of modules (of ship_super_heavy_armor category)
 
-        hulls.forEach(ShipCategory::determineCategory);
+        hulls.forEach(h -> {
+            h.setCategory(ShipCategory.determineCategory(h, h.getModules()));
+        });
 
         // this list won't contain archetypes
         return new LinkedList<>(hulls);

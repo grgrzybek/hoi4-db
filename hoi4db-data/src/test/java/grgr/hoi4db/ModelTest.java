@@ -21,9 +21,7 @@ package grgr.hoi4db;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import grgr.hoi4db.dao.CountryData;
 import grgr.hoi4db.dao.NavalData;
@@ -100,6 +98,7 @@ public class ModelTest {
         cd.allVariants().forEach((c, variants) -> {
             System.out.println("--- " + c);
             variants.forEach(v -> {
+                // only k6 is unique - I checked
 //                String k1 = v.getName();
 //                String k2 = String.format("%s|%s", v.getCountry(), v.getName());
 //                String k3 = String.format("%s|%d|%s", v.getCountry(), v.getYear(), v.getName());
@@ -139,15 +138,15 @@ public class ModelTest {
     @Test
     public void readFleets() throws IOException {
         CountryData cd = new CountryData(HOI4_DIR, new NavalData(HOI4_DIR));
-        cd.fleets("ENG").forEach(v -> {
+        cd.fleets("MAN").forEach(v -> {
             System.out.println(v.toString());
         });
-//        cd.allFleets().forEach((c, variants) -> {
-//            System.out.println("--- " + c);
-//            variants.forEach(v -> {
-//                System.out.println(v.toString());
-//            });
-//        });
+        cd.allFleets().forEach((c, variants) -> {
+            System.out.println("--- " + c);
+            variants.forEach(v -> {
+                System.out.println(v.toString());
+            });
+        });
     }
 
 }

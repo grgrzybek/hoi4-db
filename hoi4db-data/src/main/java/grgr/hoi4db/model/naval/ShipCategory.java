@@ -18,6 +18,8 @@
  */
 package grgr.hoi4db.model.naval;
 
+import java.util.Map;
+
 import static grgr.hoi4db.model.naval.ShipHullCategory.CARRIER_HULL;
 import static grgr.hoi4db.model.naval.ShipHullCategory.CRUISER_HULL;
 import static grgr.hoi4db.model.naval.ShipHullCategory.HEAVY_HULL;
@@ -52,58 +54,50 @@ public enum ShipCategory {
     /**
      * Checks what kind of ship we have and set the category inside passed {@link ShipHull}
      * @param hull
+     * @param modules
      */
-    public static void determineCategory(ShipHull hull) {
+    public static ShipCategory determineCategory(ShipHull hull, Map<String, Module> modules) {
         switch (hull.getHullCategory()) {
             case LIGHT_HULL:
-                hull.setCategory(DESTROYER);
-                break;
+                return DESTROYER;
             case CRUISER_HULL: {
                 // we have to look at modules
-                for (Module m : hull.getModules().values()) {
+                for (Module m : modules.values()) {
                     if (m.getCategory() == ModuleCategory.SHIP_MEDIUM_BATTERY) {
                         if (m.getId().startsWith("ship_light_medium_battery_")) {
-                            hull.setCategory(LIGHT_CRUISER);
-                            return;
+                            return LIGHT_CRUISER;
                         } else if (m.getId().startsWith("ship_medium_battery_")) {
-                            hull.setCategory(HEAVY_CRUISER);
-                            return;
+                            return HEAVY_CRUISER;
                         }
-                        return;
                     }
                 }
                 // no baterries included, so assume a not buildable light cruiser, which (when filled with proper
                 // mandatory batteries) may be turned into buildable light or heavy cruiser
-                hull.setCategory(LIGHT_CRUISER);
-                break;
+                return LIGHT_CRUISER;
             }
             case HEAVY_HULL: {
                 // we have to look at modules
-                for (Module m : hull.getModules().values()) {
+                for (Module m : modules.values()) {
                     if (m.getCategory() == ModuleCategory.SHIP_SUPER_HEAVY_ARMOR) {
-                        hull.setCategory(SUPER_HEAVY_BATTLESHIP);
-                        return;
+                        return SUPER_HEAVY_BATTLESHIP;
                     }
                     if (m.getCategory() == ModuleCategory.SHIP_HEAVY_ARMOR) {
                         if (m.getId().startsWith("ship_armor_bc_")) {
-                            hull.setCategory(BATTLECRUISER);
-                            return;
+                            return BATTLECRUISER;
                         } else if (m.getId().startsWith("ship_armor_bb_")) {
-                            hull.setCategory(BATTLESHIP);
-                            return;
+                            return BATTLESHIP;
                         }
                     }
                 }
                 // no armor, so assume not buildable battleship
-                hull.setCategory(BATTLESHIP);
-                break;
+                return BATTLESHIP;
             }
             case CARRIER_HULL:
-                hull.setCategory(CARRIER);
-                break;
+                return CARRIER;
             case SUB_HULL:
-                hull.setCategory(SUBMARINE);
-                break;
+                return SUBMARINE;
+            default:
+                return null;
         }
     }
 
