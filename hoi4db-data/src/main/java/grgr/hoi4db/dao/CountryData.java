@@ -20,6 +20,7 @@ package grgr.hoi4db.dao;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import grgr.hoi4db.model.DLC;
+import grgr.hoi4db.model.NamingRules;
 import grgr.hoi4db.model.Vanguard;
 import grgr.hoi4db.model.naval.Fleet;
 import grgr.hoi4db.model.naval.Module;
@@ -53,17 +55,20 @@ public class CountryData {
     private static Logger LOG = LoggerFactory.getLogger(CountryData.class);
 
     private static String COUNTRIES = "history/countries";
-    private static Pattern COUNTRIES_RE = Pattern.compile("(?<ccode>[A-Z]+) - (?<cname>[A-Za-z -]+).txt");
+    private static Pattern COUNTRIES_RE = Pattern.compile("(?<ccode>[A-Z]+) - (?<cname>[A-Za-z -]+)\\.txt");
 
     private static String UNITS = "history/units";
     private static Pattern[] UNITS_NAVAL_RE = new Pattern[] {
-            Pattern.compile("(?<ccode>[A-Z]+)_(?<year>[0-9]{4})_naval_(?<dlc>(?:legacy|mtg)).txt", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("(?<ccode>[A-Z]+)_(?<year>[0-9]{4})_naval.txt", Pattern.CASE_INSENSITIVE), // here no dlc means MtG
-            Pattern.compile("(?<ccode>[A-Z]+)_destroyers_for_bases_(?<dlc>mtg).txt"),
-            Pattern.compile("(?<ccode>[A-Z]+)_destroyers_for_bases.txt"), // here no dlc means Vanilla
-            Pattern.compile("(?<ccode>ENG)_vanguard_communist.txt"), // MtG, year 1944
-            Pattern.compile("(?<ccode>ENG)_vanguard_hms.txt"), // MtG, year 1944
+            Pattern.compile("(?<ccode>[A-Z]+)_(?<year>[0-9]{4})_naval_(?<dlc>(?:legacy|mtg))\\.txt", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(?<ccode>[A-Z]+)_(?<year>[0-9]{4})_naval\\.txt", Pattern.CASE_INSENSITIVE), // here no dlc means MtG
+            Pattern.compile("(?<ccode>[A-Z]+)_destroyers_for_bases_(?<dlc>mtg)\\.txt"),
+            Pattern.compile("(?<ccode>[A-Z]+)_destroyers_for_bases\\.txt"), // here no dlc means Vanilla
+            Pattern.compile("(?<ccode>ENG)_vanguard_communist\\.txt"), // MtG, year 1944
+            Pattern.compile("(?<ccode>ENG)_vanguard_hms\\.txt"), // MtG, year 1944
     };
+
+    private static String SHIP_NAMES = "common/units/names_ships";
+    private static Pattern SHIP_NAMES_RE = Pattern.compile("(?<ccode>[A-Z]+)_ship_names?\\.txt");
 
     private static Pattern YEAR_RE = Pattern.compile("(?<year>[0-9]{4})\\.\\d+\\.\\d+");
 
@@ -76,26 +81,72 @@ public class CountryData {
     private Map<String, Module> shipModules = new LinkedHashMap<>();
 
     // CountryData caches keyed by country
-    private Map<String, Set<ShipHullVariant>> shipHullVariants = new TreeMap<>();
+    private Map<String, Map<ShipHullVariant.Key, ShipHullVariant>> shipHullVariants = new TreeMap<>();
     private Map<String, Set<Fleet>> fleets = new TreeMap<>();
 
-    // cache of country-specific variants
+    // cache of country-specific variants...
+
+    // countr -> naming rule name -> naming rule
+    private Map<String, Map<String, NamingRules>> naming = new HashMap<>();
 
     public CountryData(File hoi4Dir, NavalData navalData) {
         this.hoi4Dir = hoi4Dir;
         this.navalData = navalData;
 
+        cacheShipNames();
         cacheNavalData();
         cacheShipHullVariants();
         cacheFleets();
     }
 
+    private void cacheShipNames() {
+        new File(hoi4Dir, SHIP_NAMES).list((dir, name) -> {
+            Matcher m = SHIP_NAMES_RE.matcher(name);
+            if (!m.matches()) {
+                return false;
+            }
+            String ccode = m.group("ccode");
+            final Map<String, NamingRules> rules = new HashMap<>();
+            naming.put(ccode, rules);
+            withFileSet(new File(hoi4Dir, SHIP_NAMES), new String[] { name }, (file, tree) -> {
+                tree.fields().forEachRemaining(e -> {
+                    // rules may be duplicated for example one with
+                    // "can_use = { not = { has_government = communism } }" and one with
+                    // "can_use = { has_government = communism }" and one with
+                    // maybe I'll handle it, for now I assume that "ordered" don't have to be handled
+                    // conditionally
+                    asList(e.getValue()).forEach(rule -> {
+                        NamingRules namingRule = new NamingRules(rule.required("name").asText());
+                        if (rule.has("fallback_name")) {
+                            namingRule.setFallbackPattern(rule.get("fallback_name").asText());
+                        }
+                        if (!rules.containsKey(e.getKey())) {
+                            rules.put(e.getKey(), namingRule);
+                            if (rule.has("ordered")) {
+                                rule.get("ordered").fields().forEachRemaining(e2 -> {
+                                    String index = e2.getKey();
+                                    String pattern = e2.getValue().get(0).asText();
+                                    namingRule.getOrderedNames().put(index, pattern);
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+            return false;
+        });
+    }
+
     public Map<String, Set<ShipHullVariant>> allVariants() {
-        return shipHullVariants;
+        Map<String, Set<ShipHullVariant>> result = new TreeMap<>();
+        shipHullVariants.forEach((k, v) -> {
+            result.put(k, new TreeSet<>(v.values()));
+        });
+        return result;
     }
 
     public Set<ShipHullVariant> variants(String country) {
-        return shipHullVariants.get(country);
+        return new TreeSet<>(shipHullVariants.get(country).values());
     }
 
     public Map<String, Set<Fleet>> allFleets() {
@@ -126,7 +177,7 @@ public class CountryData {
             Matcher m = COUNTRIES_RE.matcher(name);
             if (m.matches()) {
                 String ccode = m.group("ccode");
-                Set<ShipHullVariant> countryShipHullVariants = new TreeSet<>();
+                Map<ShipHullVariant.Key, ShipHullVariant> countryShipHullVariants = new TreeMap<>();
                 shipHullVariants.put(ccode, countryShipHullVariants);
 
                 withFileSet(new File(hoi4Dir, COUNTRIES), new String[] { name }, (file, tree) -> {
@@ -238,7 +289,7 @@ public class CountryData {
      * @param mtg
      * @param cevNode
      */
-    private void processEquipmentVariant(Set<ShipHullVariant> variants, String country, int year, boolean mtg, JsonNode cevNode) {
+    private void processEquipmentVariant(Map<ShipHullVariant.Key, ShipHullVariant> variants, String country, int year, boolean mtg, JsonNode cevNode) {
         String type = cevNode.required("type").asText();
         ShipHull hull = shipHulls.get(type);
         if (hull == null) {
@@ -350,7 +401,7 @@ public class CountryData {
             // process upgrades in Vanilla
         }
 
-        variants.add(variant);
+        variants.put(variant.getKey(), variant);
     }
 
     /**
@@ -364,7 +415,7 @@ public class CountryData {
      */
     private void processFleet(Set<Fleet> countryFleets, String country, int year, boolean mtg, JsonNode fleetNode, Vanguard vanguard) {
         String name = fleetNode.required("name").asText();
-//        System.out.printf("%s (%s/%d): %s\n", country, mtg ? DLC.MTG : DLC.VANILLA, year, name);
+        System.out.printf("fleet %s (%s/%d): %s\n", country, mtg ? DLC.MTG : DLC.VANILLA, year, name);
 
         Fleet fleet = new Fleet(name);
         fleet.setCountry(country);
@@ -384,7 +435,7 @@ public class CountryData {
 
     private void processTaskForce(Set<TaskForce> taskForces, String country, int year, boolean mtg, JsonNode taskForceNode) {
         String name = taskForceNode.required("name").asText();
-//        System.out.printf("  %s\n", name);
+        System.out.printf("  task force %s\n", name);
 
 
         if (taskForceNode.has("ship")) {
@@ -396,8 +447,74 @@ public class CountryData {
     }
 
     private void processShip(Object o, String country, int year, boolean mtg, JsonNode shipNode) {
-        String name = shipNode.required("name").asText();
-//        System.out.printf("    %s\n", name);
+        /*
+         * shipNode = {grgr.hoi4db.databind.Hoi4DbObjectNode@2660} "{"ordered_name":53,"definition":"submarine","equipment":{"ship_hull_submarine_1":{"amount":1,"owner":"JAP","version_name":"Kaidai III Class"}}}"
+         *  serialVersionUID: long  = 1 (0x1)
+         *  _children: java.util.Map
+         *   "ordered_name" -> {com.fasterxml.jackson.databind.node.BigIntegerNode@10644} "53"
+         *   "definition" -> {com.fasterxml.jackson.databind.node.TextNode@10646} ""submarine""
+         *   "equipment" -> {grgr.hoi4db.databind.Hoi4DbObjectNode@10648} "{"ship_hull_submarine_1":{"amount":1,"owner":"JAP","version_name":"Kaidai III Class"}}"
+         *    key: java.lang.String  = "equipment"
+         *    value: grgr.hoi4db.databind.Hoi4DbObjectNode  = {grgr.hoi4db.databind.Hoi4DbObjectNode@10648} "{"ship_hull_submarine_1":{"amount":1,"owner":"JAP","version_name":"Kaidai III Class"}}"
+         *     serialVersionUID: long  = 1 (0x1)
+         *     _children: java.util.Map
+         *      "ship_hull_submarine_1" -> {grgr.hoi4db.databind.Hoi4DbObjectNode@10658} "{"amount":1,"owner":"JAP","version_name":"Kaidai III Class"}"
+         *       key: java.lang.String  = "ship_hull_submarine_1"
+         *       value: grgr.hoi4db.databind.Hoi4DbObjectNode  = {grgr.hoi4db.databind.Hoi4DbObjectNode@10658} "{"amount":1,"owner":"JAP","version_name":"Kaidai III Class"}"
+         *        serialVersionUID: long  = 1 (0x1)
+         *        _children: java.util.Map
+         *         "amount" -> {com.fasterxml.jackson.databind.node.BigIntegerNode@10668} "1"
+         *         "owner" -> {com.fasterxml.jackson.databind.node.TextNode@10670} ""JAP""
+         *         "version_name" -> {com.fasterxml.jackson.databind.node.TextNode@10672} ""Kaidai III Class""
+         */
+        String name = null;
+        if (shipNode.has("name")) {
+            name = shipNode.required("name").asText();
+        } else {
+            // it should have ordered name - an index to already cached naming rules
+            String orderedName = shipNode.required("ordered_name").asText();
+
+            // a naming rule is taken from grgr.hoi4db.model.naval.ShipHullVariant.groupName
+            JsonNode equipment = shipNode.required("equipment");
+            String shipHullId = equipment.fieldNames().next();
+            String shipVariantName = equipment.get(shipHullId).required("version_name").asText();
+            ShipHullVariant.Key key = new ShipHullVariant.Key(shipVariantName);
+            key.setCountry(country);
+
+            // TODO: ship instances from e.g., history/units/JAP_1939_naval.txt
+            // do not necessarily require ship variants from 1939...
+            // however, year is needed as part of the key, because there's Italian, MtG light cruiser named
+            // "Duca degli Abruzzi Class" defined both for 1936 and 1939. For example with different
+            // "fixed_ship_battery_slot"
+            key.setYear(year);
+            key.setDlc(mtg ? DLC.MTG : DLC.VANILLA);
+
+            // there should be one field, like "ship_hull_submarine_1"
+            String hullType = equipment.fieldNames().next();
+            key.setCategory(this.shipHulls.get(hullType).getCategory());
+
+            ShipHullVariant variant = this.shipHullVariants.get(country).get(key);
+            if (variant == null && year == 1939) {
+                key.setYear(1936);
+                variant = this.shipHullVariants.get(country).get(key);
+            }
+
+            String namingGroup = variant.getGroupName();
+            NamingRules rules = naming.get(country).get(namingGroup);
+
+            int n = Integer.parseInt(orderedName);
+            String format = null;
+            if (rules.getOrderedNames().containsKey(orderedName)) {
+                // everything ok - we can generate the name
+                format = rules.getOrderedNames().get(orderedName);
+            } else {
+                // we have to use fallback name
+                format = rules.getFallbackPattern();
+            }
+
+            name = String.format(format, n);
+        }
+        System.out.printf("    ship %s\n", name);
     }
 
 }

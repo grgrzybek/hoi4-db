@@ -34,6 +34,9 @@ import grgr.hoi4db.model.upgrades.NavalUpgrade;
  */
 public class ShipHullVariant extends HasName implements Comparable<ShipHullVariant> {
 
+    // key is built when setters are invoked. but eventually it may be obtained to use with maps of hull variants
+    private final Key key;
+
     private DLC dlc;
     private int year = 1936;
 
@@ -56,6 +59,11 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
 
     public ShipHullVariant(String name) {
         super(name);
+        key = new Key(name);
+    }
+
+    public Key getKey() {
+        return key;
     }
 
     public DLC getDlc() {
@@ -64,6 +72,7 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
 
     public void setDlc(DLC dlc) {
         this.dlc = dlc;
+        this.key.setDlc(dlc);
     }
 
     public int getYear() {
@@ -72,6 +81,7 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
 
     public void setYear(int year) {
         this.year = year;
+        this.key.setYear(year);
     }
 
     public ShipCategory getCategory() {
@@ -80,6 +90,7 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
 
     public void setCategory(ShipCategory category) {
         this.category = category;
+        this.key.setCategory(category);
     }
 
     public String getCountry() {
@@ -88,6 +99,7 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
 
     public void setCountry(String country) {
         this.country = country;
+        this.key.setCountry(country);
     }
 
     public String getGroupName() {
@@ -120,39 +132,114 @@ public class ShipHullVariant extends HasName implements Comparable<ShipHullVaria
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ShipHullVariant that = (ShipHullVariant) o;
-        return year == that.year &&
-                dlc == that.dlc &&
-                country.equals(that.country) &&
-                type.getId().equals(that.type.getId());
+        return key.equals(that.key);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), dlc, year, country, type, type.getId());
+        return Objects.hash(super.hashCode(), key.hashCode());
     }
 
     @Override
     public int compareTo(ShipHullVariant o) {
-        if (!country.equals(o.country)) {
-            return country.compareTo(o.country);
-        }
-        if (dlc != o.dlc) {
-            return dlc == DLC.MTG ? -1 : 1;
-        }
-        if (year != o.year) {
-            return year - o.year;
-        }
-        // category is equivalent of type.getId()
-        if (category != o.category) {
-            return category.getOrder() - o.category.getOrder();
-        }
-
-        return getName().compareTo(o.getName());
+        return key.compareTo(o.key);
     }
 
     @Override
     public String toString() {
         return String.format("%s, %d: [%s/%s]: %s", dlc, year, category, groupName, getName());
+    }
+
+    /**
+     * A collection of properties that uniquely identifies {@link ShipHullVariant}
+     */
+    public static class Key implements Comparable<ShipHullVariant.Key> {
+        private String country;
+        private DLC dlc;
+        private int year;
+        private ShipCategory category;
+        private String name;
+
+        public Key(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Key key = (Key) o;
+            return year == key.year &&
+                    Objects.equals(country, key.country) &&
+                    dlc == key.dlc &&
+                    category == key.category &&
+                    Objects.equals(name, key.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(country, dlc, year, category, name);
+        }
+
+        @Override
+        public int compareTo(Key o) {
+            if (!country.equals(o.country)) {
+                return country.compareTo(o.country);
+            }
+            if (dlc != o.dlc) {
+                return dlc == DLC.MTG ? -1 : 1;
+            }
+            if (year != o.year) {
+                return year - o.year;
+            }
+            // category is equivalent of type.getId()
+            if (category != o.category) {
+                return category.getOrder() - o.category.getOrder();
+            }
+
+            return getName().compareTo(o.getName());
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s, %d: [%s]: %s", dlc, year, category, getName());
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
+
+        public DLC getDlc() {
+            return dlc;
+        }
+
+        public void setDlc(DLC dlc) {
+            this.dlc = dlc;
+        }
+
+        public int getYear() {
+            return year;
+        }
+
+        public void setYear(int year) {
+            this.year = year;
+        }
+
+        public ShipCategory getCategory() {
+            return category;
+        }
+
+        public void setCategory(ShipCategory category) {
+            this.category = category;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
 }

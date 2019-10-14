@@ -83,9 +83,9 @@ public class ModelTest {
     @Test
     public void readCountryShipVariants() throws IOException {
         CountryData cd = new CountryData(HOI4_DIR, new NavalData(HOI4_DIR));
-//        cd.variants("ENG").forEach(v -> {
-//            System.out.println(v.toString());
-//        });
+        cd.variants("ENG").forEach(v -> {
+            System.out.println(v.toString());
+        });
 
         Map<String, ShipHullVariant> byName = new HashMap<>();
         Map<String, ShipHullVariant> byCountryName = new HashMap<>();
@@ -130,7 +130,7 @@ public class ModelTest {
                 if (v6 != null) {
                     throw new IllegalStateException("(" + v + ") there's already a country/year/dlc/name/type variant " + v6);
                 }
-                System.out.println(v.toString());
+//                System.out.println(v.toString());
             });
         });
     }
@@ -138,9 +138,9 @@ public class ModelTest {
     @Test
     public void readFleets() throws IOException {
         CountryData cd = new CountryData(HOI4_DIR, new NavalData(HOI4_DIR));
-        cd.fleets("MAN").forEach(v -> {
-            System.out.println(v.toString());
-        });
+//        cd.fleets("SOV").forEach(v -> {
+//            System.out.println(v.toString());
+//        });
         cd.allFleets().forEach((c, variants) -> {
             System.out.println("--- " + c);
             variants.forEach(v -> {

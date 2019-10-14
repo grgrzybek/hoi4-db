@@ -526,7 +526,8 @@ public class Hoi4DbParser extends ParserBase {
                 break;
             } else if (outBuf == null) {
                 // name will (possibly) be split across buffers
-                _textBuffer.resetWithShared(_inputBuffer, start, _inputPtr - start);
+                int offset = inString ? 1 : 0;
+                _textBuffer.resetWithShared(_inputBuffer, start + offset, _inputPtr - start - offset);
                 outBuf = _textBuffer.getCurrentSegment();
                 outPtr = _textBuffer.getCurrentSegmentSize();
             }

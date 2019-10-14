@@ -95,6 +95,14 @@ public class SteamTest {
         mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
     }
 
+    @Test
+    public void readAcrossBuffers() throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new Hoi4DbFactory());
+        mapper.setNodeFactory(new Hoi4DbNodeFactory());
+        JsonNode tree = mapper.readTree(new File(HOI4_DIR, "history/units/SOV_1939_naval_mtg.txt"));
+        mapper.writer(new DefaultPrettyPrinter()).writeValue(System.out, tree);
+    }
+
     private void prettyPrint(JsonParser parser, boolean print) throws IOException {
         int ind = 0;
         while (parser.nextToken() != null) {
