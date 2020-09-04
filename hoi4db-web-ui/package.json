@@ -39,7 +39,7 @@
     "core-js": "^2.5.0",
     "css-loader": "^2.1.1",
     "jquery": "^3.3.1",
-    "node-sass": "^4.11.0",
+    "node-sass": "^4.13.1",
     "popper.js": "^1.14.7",
     "postcss-loader": "^3.0.0",
     "rxjs": "^6.4.0",
