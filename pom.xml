@@ -69,7 +69,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Versions -->
         <version.com.fasterxml.jackson>2.10.0.pr3</version.com.fasterxml.jackson>
-        <version.commons-io>2.6</version.commons-io>
+        <version.commons-io>2.7</version.commons-io>
         <version.io.undertow>2.0.26.Final</version.io.undertow>
         <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
         <version.org.apache.cxf>3.3.3</version.org.apache.cxf>
