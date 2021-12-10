@@ -71,7 +71,7 @@
         <version.com.fasterxml.jackson>2.10.0.pr3</version.com.fasterxml.jackson>
         <version.commons-io>2.6</version.commons-io>
         <version.io.undertow>2.0.26.Final</version.io.undertow>
-        <version.org.apache.logging.log4j>2.12.1</version.org.apache.logging.log4j>
+        <version.org.apache.logging.log4j>2.15.0</version.org.apache.logging.log4j>
         <version.org.apache.cxf>3.3.3</version.org.apache.cxf>
         <version.org.assertj>3.13.2</version.org.assertj>
         <version.org.junit.jupiter>5.5.2</version.org.junit.jupiter>
